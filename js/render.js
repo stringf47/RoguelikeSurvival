@@ -581,7 +581,7 @@ function drawPlayer(){
 }
 
 function drawMinimap(){
-  const msW=128,msH=96,mx=W-msW-12,my=H-msH-12;
+  const msW=touchDevice?180:128,msH=touchDevice?135:96,mx=W-msW-12,my=H-msH-12;
   const scX=msW/WORLD,scY=msH/WORLDH;
   ctx.fillStyle='rgba(0,0,0,.55)';ctx.strokeStyle='#330000';ctx.lineWidth=1;
   ctx.fillRect(mx,my,msW,msH);ctx.strokeRect(mx,my,msW,msH);
@@ -807,7 +807,7 @@ function drawSealArrow(seal){
   const dist=Math.floor(Math.hypot(seal.x-pl.x,seal.y-pl.y));
   const isCc=seal.type==='cc';
 
-  const cx=W/2,cy=H/2,pad=160;
+  const cx=W/2,cy=H/2,pad=touchDevice?200:160;
   const hw=cx-pad,hh=cy-pad;
   const cos=Math.cos(angle),sin=Math.sin(angle);
   const sX=cos!==0?hw/Math.abs(cos):Infinity;
@@ -836,7 +836,7 @@ function drawChestArrow(chest){
   const dist=Math.floor(Math.hypot(chest.x-pl.x,chest.y-pl.y));
 
   // Find screen-edge position along the angle
-  const cx=W/2,cy=H/2,pad=160;
+  const cx=W/2,cy=H/2,pad=touchDevice?200:160;
   const hw=cx-pad,hh=cy-pad;
   const cos=Math.cos(angle),sin=Math.sin(angle);
   const sX=cos!==0?hw/Math.abs(cos):Infinity;

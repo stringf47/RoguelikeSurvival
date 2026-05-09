@@ -53,7 +53,7 @@ canvas { display:block; touch-action:none; }
   transition:background .2s, border-color .2s, color .2s;
 }
 #mobilePause:hover { background:rgba(34,0,0,.85); border-color:#cc1111; color:#ff4444; }
-@media (hover:none) { #mobilePause { display:block; } }
+@media (hover:none) { #mobilePause { display:none; } }
 #muteBtn {
   position:absolute; bottom:152px; right:12px;
   background:rgba(0,0,0,.65); border:1px solid #440000; color:#cc1111;
@@ -66,12 +66,15 @@ canvas { display:block; touch-action:none; }
 #pauseBtn {
   position:absolute; bottom:120px; right:12px;
   background:rgba(0,0,0,.65); border:1px solid #440000; color:#cc1111;
-  font-size:15px; padding:4px 8px; pointer-events:auto; cursor:pointer; z-index:11;
-  min-width:37px; text-align:center;
+  font-size:11px; padding:5px 10px; letter-spacing:2px; pointer-events:auto; cursor:pointer; z-index:11;
   transition:background .2s, border-color .2s, transform .1s;
 }
 #pauseBtn:hover { background:rgba(34,0,0,.85); border-color:#cc1111; }
 #pauseBtn:active { transform:scale(.92); }
+@media (hover:none) {
+  #muteBtn  { bottom:196px; }
+  #pauseBtn { bottom:160px; }
+}
 
 /* ── SCREENS ── */
 .screen {
@@ -250,7 +253,7 @@ canvas { display:block; touch-action:none; }
 
   <button id="mobilePause" onclick="togglePause()">❙❙ PAUSE</button>
   <button id="muteBtn" onclick="toggleMute()">🔊</button>
-  <button id="pauseBtn" onclick="togglePause()">⏸</button>
+  <button id="pauseBtn" onclick="togglePause()">❙❙ PAUSE</button>
 
   <div id="hudTooltip"></div>
   <div id="sealBanner">
