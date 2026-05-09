@@ -36,7 +36,8 @@ function checkPlayerDeath(){
 function initPlayer(){
   pl={x:WORLD/2,y:WORLD/2,hp:150,maxHp:150,speed:160,level:1,xp:0,xpNext:10,
       armor:0,regen:0,regenT:0,magnet:80,iframes:0,lastAngle:0,weapons:[],passives:{},
-      rangeMult:1.0,dmgMult:1.0,atkSpeedMult:1.0,wAtkMult:{},wDmgMult:{},wLvDmgMult:1,wLvAtkMult:1};
+      rangeMult:1.0,dmgMult:1.0,atkSpeedMult:1.0,wAtkMult:{},wDmgMult:{},wLvDmgMult:1,wLvAtkMult:1,
+      leanAng:0,leanVel:0};
   addWeapon('wand');
 }
 
@@ -84,6 +85,9 @@ function update(dt){
 
   const{dx,dy}=getDir();
   pl.x+=dx*pl.speed*dt;pl.y+=dy*pl.speed*dt;
+  const targetLean=dx*0.26;
+  pl.leanVel+=(targetLean-pl.leanAng)*55*dt-pl.leanVel*9*dt;
+  pl.leanAng+=pl.leanVel*dt;
   pl.x=Math.max(20,Math.min(WORLD-20,pl.x));
   pl.y=Math.max(20,Math.min(WORLD-20,pl.y));
   if(pl.iframes>0)pl.iframes-=dt;
@@ -179,6 +183,10 @@ function update(dt){
     }else{
       if(ed>0){e.x+=(ex/ed)*e.spd*sm*dt;e.y+=(ey/ed)*e.spd*sm*dt;}
     }
+
+    const eLean=ed>0?(ex/ed)*0.20:0;
+    e.leanVel+=(eLean-e.leanAng)*55*dt-e.leanVel*9*dt;
+    e.leanAng+=e.leanVel*dt;
 
     if(pl.iframes<=0&&ed<e.r+14){
       const dmg=Math.max(1,e.dmg-pl.armor);

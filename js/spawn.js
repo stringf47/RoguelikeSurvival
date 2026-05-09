@@ -2,7 +2,7 @@ function spawnEnemyAt(type,x,y){
   const sc=1+gameTime/400;
   const e={id:++eid,x,y,hp:type.hp*sc,maxHp:type.hp*sc,spd:type.spd,dmg:type.dmg*sc,
     r:type.r,col:type.col,xpV:type.xpV,xpC:type.xpC,flash:0,dead:false,name:type.name,ang:0,
-    dying:false,dyingT:0,shakeX:0,shakeY:0};
+    dying:false,dyingT:0,shakeX:0,shakeY:0,leanAng:0,leanVel:0};
   if(type.name==='Ram Rusher'){e.chargeState='idle';e.chargeT=1+Math.random()*2;e.chargeDx=0;e.chargeDy=0;e.chargeTimeLeft=0;}
   if(type.name==='Egg Chucker'){e.eggT=1+Math.random()*1.5;}
   enemies.push(e);

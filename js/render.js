@@ -256,6 +256,7 @@ function drawEnemy(e){
   ctx.save();
   ctx.translate(e.x+(e.shakeX||0),e.y+(e.shakeY||0));
   if(e.flash>.08&&Math.floor(e.flash*12)%2===0)ctx.globalAlpha=.4;
+  ctx.rotate(e.leanAng||0);
 
   const nm=e.name;
   if(nm==='Cursed Crow'){
@@ -418,6 +419,8 @@ function drawPlayer(){
 
   ctx.beginPath();ctx.ellipse(0,14,13,5,0,0,Math.PI*2);
   ctx.fillStyle='rgba(0,0,0,.4)';ctx.fill();
+
+  ctx.rotate(pl.leanAng||0);
 
   ctx.beginPath();ctx.ellipse(0,0,13,11,0,0,Math.PI*2);
   ctx.fillStyle='#e8b86d';ctx.shadowBlur=0;ctx.fill();
