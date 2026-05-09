@@ -308,6 +308,12 @@ function resumeGame(){
   document.getElementById('pauseBanner').style.display='none';
 }
 
+function togglePause(){
+  if(state!=='playing')return;
+  paused=!paused;
+  document.getElementById('pauseBanner').style.display=paused?'block':'none';
+}
+
 function goEndless(){
   endless=true;state='playing';
   document.getElementById('winScreen').classList.add('hidden');

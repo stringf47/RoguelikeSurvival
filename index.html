@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 <title>BUTTERBALL'S LAST STAND</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -11,8 +12,15 @@ body {
   min-height:100vh; overflow:hidden;
   font-family:'Georgia',serif;
 }
-#wrap { position:relative; width:800px; height:600px; }
-canvas { display:block; }
+#wrap { position:relative; width:800px; height:600px; transform-origin:center center; }
+canvas { display:block; touch-action:none; }
+#mobilePause {
+  position:absolute; top:8px; left:50%; transform:translateX(-50%);
+  background:rgba(0,0,0,.65); border:1px solid #440000; color:#cc1111;
+  font-family:inherit; font-size:11px; padding:5px 16px; letter-spacing:2px;
+  pointer-events:auto; cursor:pointer; display:none; z-index:11;
+}
+@media (hover:none) { #mobilePause { display:block; } }
 
 /* ── SCREENS ── */
 .screen {
@@ -88,6 +96,8 @@ canvas { display:block; }
 <div id="wrap">
   <canvas id="gc" width="800" height="600"></canvas>
 
+  <button id="mobilePause" onclick="togglePause()">❙❙ PAUSE</button>
+
   <!-- HUD -->
   <div id="hud">
     <div id="hpWrap">
@@ -116,10 +126,10 @@ canvas { display:block; }
   <!-- Menu -->
   <div id="menuScreen" class="screen">
     <h1>BUTTERBALL'S</h1><h2>LAST STAND</h2>
-    <p>Move with WASD or Arrow Keys</p>
+    <p>Move with WASD / Arrow Keys, or drag left side of screen</p>
     <p>Weapons fire automatically — protect the flock until dawn</p>
     <p>Survive until dawn to save the farm</p>
-    <p style="margin-top:10px;color:#666">Press ESC to pause</p>
+    <p style="margin-top:10px;color:#666">ESC or pause button to pause</p>
     <button class="btn" onclick="startGame()">HOLD UNTIL DAWN</button>
   </div>
 
@@ -158,6 +168,16 @@ canvas { display:block; }
   </div>
 </div>
 
+<script>
+(function(){
+  function scale(){
+    var s=Math.min(window.innerWidth/800,window.innerHeight/600);
+    document.getElementById('wrap').style.transform='scale('+s+')';
+  }
+  window.addEventListener('resize',scale);
+  scale();
+})();
+</script>
 <script src="js/config.js"></script>
 <script src="js/state.js"></script>
 <script src="js/utils.js"></script>

@@ -207,6 +207,18 @@ function render(){
   }
 
   drawMinimap();
+
+  if(joystick.active){
+    ctx.save();
+    ctx.globalAlpha=0.28;
+    ctx.beginPath();ctx.arc(joystick.baseX,joystick.baseY,JRADIUS,0,Math.PI*2);
+    ctx.strokeStyle='#ffffff';ctx.lineWidth=2;ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,0.08)';ctx.fill();
+    ctx.globalAlpha=0.5;
+    ctx.beginPath();ctx.arc(joystick.knobX,joystick.knobY,JRADIUS*0.38,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,255,255,0.55)';ctx.fill();
+    ctx.restore();
+  }
 }
 
 function drawBG(){
