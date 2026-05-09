@@ -26,6 +26,9 @@ let _lastHudT=0;
 let _wbSig='';
 let _legSig='';
 
+let _ttActive=null;
+function _hideTooltip(){ _tooltip.style.display='none'; _ttActive=null; }
+
 function _showTooltip(el, name, desc){
   el.addEventListener('mouseenter', e=>{
     _tooltip.innerHTML=`<span class="tt-name">${name}</span>${desc}`;
@@ -33,17 +36,28 @@ function _showTooltip(el, name, desc){
     _posTooltip(e);
   });
   el.addEventListener('mousemove', _posTooltip);
-  el.addEventListener('mouseleave', ()=>{ _tooltip.style.display='none'; });
+  el.addEventListener('mouseleave', ()=>{ if(_ttActive!==el)_tooltip.style.display='none'; });
+  el.addEventListener('touchstart', e=>{
+    e.stopPropagation();
+    if(_ttActive===el){ _hideTooltip(); return; }
+    _ttActive=el;
+    _tooltip.innerHTML=`<span class="tt-name">${name}</span>${desc}`;
+    _tooltip.style.display='block';
+    const t=e.touches[0];
+    _posTooltipXY(t.clientX,t.clientY);
+  },{passive:true});
 }
-function _posTooltip(e){
+function _posTooltip(e){ _posTooltipXY(e.clientX,e.clientY); }
+function _posTooltipXY(cx,cy){
   const wrap=document.getElementById('wrap').getBoundingClientRect();
   const s=wrap.width/800;
-  let x=(e.clientX-wrap.left)/s+12, y=(e.clientY-wrap.top)/s-80;
+  let x=(cx-wrap.left)/s+12, y=(cy-wrap.top)/s-80;
   if(x+210>800)x-=220;
   if(y<4)y=4;
   _tooltip.style.left=x+'px';
   _tooltip.style.top=y+'px';
 }
+document.addEventListener('touchstart',()=>{ if(_ttActive)_hideTooltip(); },{passive:true});
 
 function updateHUD(){
   const now=performance.now();
