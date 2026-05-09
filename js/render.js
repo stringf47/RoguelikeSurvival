@@ -208,21 +208,18 @@ function render(){
     if(!s.dead&&!onScreen(s.x,s.y,30))drawSealArrow(s);
   }
 
-  if(!touchDevice||joyActivated)drawMinimap();
+  drawMinimap();
 
-  if(state==='playing'&&touchDevice){
-    if(joyActivated){
-      ctx.save();
-      const ja=joystick.active;
-      ctx.globalAlpha=ja?0.55:0.2;
-      ctx.beginPath();ctx.arc(JBASE.x,JBASE.y,JRADIUS,0,Math.PI*2);
-      ctx.strokeStyle='#ffffff';ctx.lineWidth=2.5;ctx.stroke();
-      ctx.fillStyle=`rgba(255,255,255,${ja?0.08:0.03})`;ctx.fill();
-      ctx.globalAlpha=ja?0.85:0.25;
-      ctx.beginPath();ctx.arc(joystick.knobX,joystick.knobY,JRADIUS*0.35,0,Math.PI*2);
-      ctx.fillStyle='#ffffff';ctx.fill();
-      ctx.restore();
-    }
+  if(state==='playing'&&joystick.active){
+    ctx.save();
+    ctx.globalAlpha=0.55;
+    ctx.beginPath();ctx.arc(JBASE.x,JBASE.y,JRADIUS,0,Math.PI*2);
+    ctx.strokeStyle='#ffffff';ctx.lineWidth=2.5;ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,0.08)';ctx.fill();
+    ctx.globalAlpha=0.85;
+    ctx.beginPath();ctx.arc(joystick.knobX,joystick.knobY,JRADIUS*0.35,0,Math.PI*2);
+    ctx.fillStyle='#ffffff';ctx.fill();
+    ctx.restore();
   }
 
   // Vignette — blends dark / purple (SS) / red (CC)
@@ -583,7 +580,7 @@ function drawPlayer(){
 }
 
 function drawMinimap(){
-  const msW=154,msH=116,mx=touchDevice?(joySide==='left'?W-msW-12:12):12,my=H-msH-12;
+  const msW=154,msH=116,mx=joySide==='left'?W-msW-12:12,my=H-msH-12;
   const scX=msW/WORLD,scY=msH/WORLDH;
   ctx.fillStyle='rgba(0,0,0,.55)';ctx.strokeStyle='#330000';ctx.lineWidth=1;
   ctx.fillRect(mx,my,msW,msH);ctx.strokeRect(mx,my,msW,msH);
@@ -809,7 +806,7 @@ function drawSealArrow(seal){
   const dist=Math.floor(Math.hypot(seal.x-pl.x,seal.y-pl.y));
   const isCc=seal.type==='cc';
 
-  const cx=W/2,cy=H/2,pad=touchDevice?210:240;
+  const cx=W/2,cy=H/2,pad=240;
   const hw=cx-pad,hh=cy-pad;
   const cos=Math.cos(angle),sin=Math.sin(angle);
   const sX=cos!==0?hw/Math.abs(cos):Infinity;
@@ -838,7 +835,7 @@ function drawChestArrow(chest){
   const dist=Math.floor(Math.hypot(chest.x-pl.x,chest.y-pl.y));
 
   // Find screen-edge position along the angle
-  const cx=W/2,cy=H/2,pad=touchDevice?210:240;
+  const cx=W/2,cy=H/2,pad=240;
   const hw=cx-pad,hh=cy-pad;
   const cos=Math.cos(angle),sin=Math.sin(angle);
   const sX=cos!==0?hw/Math.abs(cos):Infinity;

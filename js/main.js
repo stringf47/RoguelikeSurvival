@@ -1,3 +1,11 @@
+let hasMovedOnce=false;
+function onFirstMove(){
+  hasMovedOnce=true;
+  ['muteBtn','pauseBtn'].forEach(id=>{const el=document.getElementById(id);if(el){el.style.transition='opacity 0.5s';el.style.opacity='1';}});
+  const tp=document.getElementById('touchPrompt');
+  if(tp){tp.style.transition='opacity 0.6s';tp.style.opacity='0';setTimeout(()=>{tp.style.display='none';},700);}
+}
+
 const CHEST_FILL_R=80;
 const CHEST_FILL_RATE=0.25;
 const CHEST_DRAIN_RATE=0.6;
@@ -556,8 +564,10 @@ function startGame(){
   spawnT=0;hordeT={};sealSpottedT=0;ccSpottedT=0;sealBuffT=0;sealVignette=0;crimsonVignette=0;
   ccSpawnIdx=0;crimsonCrossBuffActive=false;crimsonCrossBuffT=0;crimsonCrossDebuff='';paused=false;wave=0;bgWave=0;totalDmg=0;totalXp=0;vacuumT=0;endless=false;chests=[];chestSpawnIdx=0;seals=[];sealSpawnIdx=0;sealProjs=[];sealBuffActive=false;corruptedZones=[];enemyDmgMult=1;
   _wbSig='';
-  joyActivated=false;
-  if(touchDevice)showTouchPrompt();
+  hasMovedOnce=false;
+  ['muteBtn','pauseBtn'].forEach(id=>{const el=document.getElementById(id);if(el){el.style.opacity='0';el.style.transition='none';}});
+  const tp=document.getElementById('touchPrompt');
+  if(tp){tp.style.transition='none';tp.style.opacity='1';tp.style.display='block';}
   _setPause(false);
   ['menuScreen','goScreen','winScreen','lvlScreen'].forEach(id=>document.getElementById(id).classList.add('hidden'));
   // Pick one enemy per class for this run

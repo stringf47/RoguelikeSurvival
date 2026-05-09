@@ -2,9 +2,7 @@ const keys={};
 const JRADIUS=65;
 const JBASE={x:665,y:465};
 const joystick={active:false,id:-1,knobX:665,knobY:465,dx:0,dy:0};
-let touchDevice=false;
 let joySide='right';
-let joyActivated=false;
 
 function _applyJoySide(side){
   joySide=side;
@@ -15,29 +13,6 @@ function _applyJoySide(side){
     if(!el)return;
     el.style[a]='12px';el.style[b]='auto';
   });
-}
-
-function _activateJoy(side){
-  _applyJoySide(side);
-  if(!joyActivated){
-    joyActivated=true;
-    ['muteBtn','pauseBtn'].forEach(id=>{
-      const el=document.getElementById(id);
-      if(el)el.style.visibility='';
-    });
-    const tp=document.getElementById('touchPrompt');
-    if(tp){
-      setTimeout(()=>{ tp.style.opacity='0'; },800);
-      setTimeout(()=>{ tp.style.display='none'; },1700);
-    }
-  }
-}
-
-function showTouchPrompt(){
-  const tp=document.getElementById('touchPrompt');
-  if(!tp)return;
-  tp.style.opacity='1';
-  tp.style.display='block';
 }
 
 function toCanvas(clientX,clientY){
@@ -54,16 +29,9 @@ function resetJoystick(){
 canvas.addEventListener('pointerdown',e=>{
   if(e.pointerType==='mouse')return;
   e.preventDefault();
-  if(!touchDevice){
-    touchDevice=true;
-    ['muteBtn','pauseBtn'].forEach(id=>{
-      const el=document.getElementById(id);
-      if(el)el.style.visibility='hidden';
-    });
-  }
   if(!joystick.active){
     const p=toCanvas(e.clientX,e.clientY);
-    _activateJoy(p.x<400?'left':'right');
+    _applyJoySide(p.x<400?'left':'right');
     joystick.active=true;joystick.id=e.pointerId;
     joystick.knobX=JBASE.x;joystick.knobY=JBASE.y;
     joystick.dx=0;joystick.dy=0;
@@ -76,8 +44,7 @@ canvas.addEventListener('pointermove',e=>{
   e.preventDefault();
   const p=toCanvas(e.clientX,e.clientY);
   const ddx=p.x-JBASE.x,ddy=p.y-JBASE.y;
-  const dist=Math.hypot(ddx,ddy);
-  const ang=Math.atan2(ddy,ddx);
+  const dist=Math.hypot(ddx,ddy),ang=Math.atan2(ddy,ddx);
   joystick.knobX=JBASE.x+Math.cos(ang)*Math.min(dist,JRADIUS);
   joystick.knobY=JBASE.y+Math.sin(ang)*Math.min(dist,JRADIUS);
   joystick.dx=dist>10?Math.cos(ang):0;
@@ -109,6 +76,10 @@ function getDir(){
   if(keys['ArrowUp']||keys['w']||keys['W'])dy-=1;
   if(keys['ArrowDown']||keys['s']||keys['S'])dy+=1;
   dx+=joystick.dx;dy+=joystick.dy;
-  if(dx||dy){const l=Math.hypot(dx,dy);dx/=l;dy/=l;pl.lastAngle=Math.atan2(dy,dx);}
+  if(dx||dy){
+    const l=Math.hypot(dx,dy);dx/=l;dy/=l;
+    pl.lastAngle=Math.atan2(dy,dx);
+    if(!hasMovedOnce)onFirstMove();
+  }
   return{dx,dy};
 }
