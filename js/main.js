@@ -556,7 +556,8 @@ function startGame(){
   spawnT=0;hordeT={};sealSpottedT=0;ccSpottedT=0;sealBuffT=0;sealVignette=0;crimsonVignette=0;
   ccSpawnIdx=0;crimsonCrossBuffActive=false;crimsonCrossBuffT=0;crimsonCrossDebuff='';paused=false;wave=0;bgWave=0;totalDmg=0;totalXp=0;vacuumT=0;endless=false;chests=[];chestSpawnIdx=0;seals=[];sealSpawnIdx=0;sealProjs=[];sealBuffActive=false;corruptedZones=[];enemyDmgMult=1;
   _wbSig='';
-  joyActivated=false;joyActivatedAt=0;
+  joyActivated=false;
+  if(touchDevice)showTouchPrompt();
   _setPause(false);
   ['menuScreen','goScreen','winScreen','lvlScreen'].forEach(id=>document.getElementById(id).classList.add('hidden'));
   // Pick one enemy per class for this run

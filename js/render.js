@@ -222,17 +222,6 @@ function render(){
       ctx.beginPath();ctx.arc(joystick.knobX,joystick.knobY,JRADIUS*0.35,0,Math.PI*2);
       ctx.fillStyle='#ffffff';ctx.fill();
       ctx.restore();
-      // Prompt fades out after first touch
-      const _pa=Math.max(0,1-(_now-joyActivatedAt)/900);
-      if(_pa>0){
-        ctx.save();
-        ctx.globalAlpha=_pa;
-        ctx.font='bold 22px Georgia';ctx.textAlign='center';ctx.textBaseline='middle';
-        ctx.fillStyle='#ffcc88';ctx.fillText('◄ TAP TO MOVE ►',W/2,H-110);
-        ctx.globalAlpha=_pa*0.6;ctx.font='15px Georgia';ctx.fillStyle='#cc9955';
-        ctx.fillText('LEFT HAND  OR  RIGHT HAND',W/2,H-80);
-        ctx.restore();
-      }
     }
   }
 
