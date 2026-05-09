@@ -208,19 +208,46 @@ function render(){
     if(!s.dead&&!onScreen(s.x,s.y,30))drawSealArrow(s);
   }
 
-  drawMinimap();
+  if(!touchDevice||joyActivated)drawMinimap();
 
   if(state==='playing'&&touchDevice){
-    ctx.save();
-    const ja=joystick.active;
-    ctx.globalAlpha=ja?0.55:0.2;
-    ctx.beginPath();ctx.arc(JBASE.x,JBASE.y,JRADIUS,0,Math.PI*2);
-    ctx.strokeStyle='#ffffff';ctx.lineWidth=2.5;ctx.stroke();
-    ctx.fillStyle=`rgba(255,255,255,${ja?0.08:0.03})`;ctx.fill();
-    ctx.globalAlpha=ja?0.85:0.25;
-    ctx.beginPath();ctx.arc(joystick.knobX,joystick.knobY,JRADIUS*0.35,0,Math.PI*2);
-    ctx.fillStyle='#ffffff';ctx.fill();
-    ctx.restore();
+    if(joyActivated){
+      ctx.save();
+      const ja=joystick.active;
+      ctx.globalAlpha=ja?0.55:0.2;
+      ctx.beginPath();ctx.arc(JBASE.x,JBASE.y,JRADIUS,0,Math.PI*2);
+      ctx.strokeStyle='#ffffff';ctx.lineWidth=2.5;ctx.stroke();
+      ctx.fillStyle=`rgba(255,255,255,${ja?0.08:0.03})`;ctx.fill();
+      ctx.globalAlpha=ja?0.85:0.25;
+      ctx.beginPath();ctx.arc(joystick.knobX,joystick.knobY,JRADIUS*0.35,0,Math.PI*2);
+      ctx.fillStyle='#ffffff';ctx.fill();
+      ctx.restore();
+    } else {
+      // Prompt — tap left or right to begin
+      const pa=Math.min(1,(_now%1200<600?0.55:0.9));
+      ctx.save();
+      ctx.globalAlpha=pa;
+      ctx.font='bold 22px Georgia';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillStyle='#ffcc88';
+      ctx.fillText('◄ TAP TO MOVE ►',W/2,H-110);
+      ctx.globalAlpha=pa*0.6;
+      ctx.font='15px Georgia';
+      ctx.fillStyle='#cc9955';
+      ctx.fillText('LEFT HAND  OR  RIGHT HAND',W/2,H-80);
+      ctx.restore();
+    }
+    // Fade-out of prompt after activation
+    if(joyActivated&&joyActivatedAt){
+      const fa=Math.max(0,1-(_now-joyActivatedAt)/600);
+      if(fa>0){
+        ctx.save();ctx.globalAlpha=fa;
+        ctx.font='bold 22px Georgia';ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillStyle='#ffcc88';ctx.fillText('◄ TAP TO MOVE ►',W/2,H-110);
+        ctx.globalAlpha=fa*0.6;ctx.font='15px Georgia';ctx.fillStyle='#cc9955';
+        ctx.fillText('LEFT HAND  OR  RIGHT HAND',W/2,H-80);
+        ctx.restore();
+      }
+    }
   }
 
   // Vignette — blends dark / purple (SS) / red (CC)

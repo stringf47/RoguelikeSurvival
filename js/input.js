@@ -3,21 +3,33 @@ const JRADIUS=65;
 const JBASE={x:665,y:465};
 const joystick={active:false,id:-1,knobX:665,knobY:465,dx:0,dy:0};
 let touchDevice=false;
-let joySide='right'; // 'left' or 'right' — set on first touch each session
+let joySide='right';
+let joyActivated=false;
+let joyActivatedAt=0;
 
 function _applyJoySide(side){
   joySide=side;
   JBASE.x=side==='left'?135:665;
-  // minimap goes to opposite side — render.js reads joySide
-  // buttons follow the minimap side
   const mapSide=side==='left'?'right':'left';
   const offSide=side==='left'?'left':'right';
   ['muteBtn','pauseBtn'].forEach(id=>{
     const el=document.getElementById(id);
     if(!el)return;
     el.style[mapSide]='12px';
-    el.style[offSide]='';
+    el.style[offSide]='auto';
   });
+}
+
+function _activateJoy(side){
+  _applyJoySide(side);
+  if(!joyActivated){
+    joyActivated=true;
+    joyActivatedAt=Date.now();
+    ['muteBtn','pauseBtn'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el)el.style.visibility='';
+    });
+  }
 }
 
 function toCanvas(clientX,clientY){
@@ -34,11 +46,17 @@ function resetJoystick(){
 canvas.addEventListener('pointerdown',e=>{
   if(e.pointerType==='mouse')return;
   e.preventDefault();
-  touchDevice=true;
+  if(!touchDevice){
+    touchDevice=true;
+    // Hide buttons until joystick is activated
+    ['muteBtn','pauseBtn'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el)el.style.visibility='hidden';
+    });
+  }
   if(!joystick.active){
     const p=toCanvas(e.clientX,e.clientY);
-    const side=p.x<400?'left':'right';
-    if(side!==joySide)_applyJoySide(side);
+    _activateJoy(p.x<400?'left':'right');
     joystick.active=true;joystick.id=e.pointerId;
     joystick.knobX=JBASE.x;joystick.knobY=JBASE.y;
     joystick.dx=0;joystick.dy=0;
