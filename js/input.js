@@ -23,6 +23,7 @@ window.addEventListener('keydown',e=>{
 });
 
 window.addEventListener('keyup',e=>{keys[e.key]=false;});
+window.addEventListener('blur',()=>{for(const k in keys)keys[k]=false;});
 
 function getDir(){
   let dx=0,dy=0;

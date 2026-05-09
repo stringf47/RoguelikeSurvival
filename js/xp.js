@@ -35,6 +35,7 @@ function genChestChoices(){
 
 function openChest(){
   state='levelup';
+  for(const k in keys)keys[k]=false;
   currentChoices=genChestChoices();
   selectedCardIdx=0;
   const cc=document.getElementById('cardContainer');
@@ -66,6 +67,7 @@ function triggerLU(){
   if(pendingLU<=0)return;
   pendingLU--;
   state='levelup';
+  for(const k in keys)keys[k]=false;
   currentChoices=genChoices(3);
   selectedCardIdx=0;
   const cc=document.getElementById('cardContainer');
