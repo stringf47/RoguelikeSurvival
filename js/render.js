@@ -208,7 +208,7 @@ function render(){
 
   drawMinimap();
 
-  if(state==='playing'&&navigator.maxTouchPoints>0){
+  if(state==='playing'&&touchDevice){
     ctx.save();
     const ja=joystick.active;
     ctx.globalAlpha=ja?0.55:0.2;

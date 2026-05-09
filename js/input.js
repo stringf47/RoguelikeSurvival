@@ -2,6 +2,7 @@ const keys={};
 const JRADIUS=65;
 const JBASE={x:110,y:490};
 const joystick={active:false,id:-1,knobX:110,knobY:490,dx:0,dy:0};
+let touchDevice=false;
 
 function toCanvas(t){
   const r=canvas.getBoundingClientRect();
@@ -10,6 +11,7 @@ function toCanvas(t){
 
 canvas.addEventListener('touchstart',e=>{
   e.preventDefault();
+  touchDevice=true;
   for(const t of e.changedTouches){
     if(!joystick.active){
       joystick.active=true;joystick.id=t.identifier;
