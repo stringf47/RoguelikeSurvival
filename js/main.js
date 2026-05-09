@@ -1,0 +1,334 @@
+const CHEST_FILL_R=80;
+const CHEST_FILL_RATE=0.38;
+const CHEST_DRAIN_RATE=0.6;
+
+function spawnChest(){
+  let x,y;
+  for(let i=0;i<16;i++){
+    x=200+Math.random()*(WORLD-400);
+    y=200+Math.random()*(WORLD-400);
+    if(Math.hypot(x-pl.x,y-pl.y)>1200)break;
+  }
+  chests.push({x,y,id:++eid,done:false,fill:0});
+}
+
+function triggerDeath(){
+  pl.hp=0;state='gameover';
+  document.getElementById('goScreen').classList.remove('hidden');
+  document.getElementById('goT').textContent='Survived: '+fmt(gameTime);
+  document.getElementById('goK').textContent='Enemies Slain: '+kills;
+  document.getElementById('goLv').textContent='Level Reached: '+pl.level;
+  document.getElementById('goDmg').textContent='Total Damage: '+(totalDmg>=1000?(totalDmg/1000).toFixed(1)+'k':totalDmg);
+  document.getElementById('goXp').textContent='XP Collected: '+totalXp;
+  document.getElementById('goDps').textContent='Avg DPS: '+Math.floor(totalDmg/gameTime);
+}
+
+function checkPlayerDeath(){
+  if(pl.hp>0)return;
+  if(pl.finalStand&&!pl.finalStandUsed){
+    pl.finalStandUsed=true;pl.hp=1;pl.iframes=3;pl.finalStandRecoverT=2.0;
+    burst(pl.x,pl.y,'#ffffff',25);burst(pl.x,pl.y,'#ff6688',15);shake.t=.6;
+    return;
+  }
+  triggerDeath();
+}
+
+function initPlayer(){
+  pl={x:WORLD/2,y:WORLD/2,hp:200,maxHp:200,speed:160,level:1,xp:0,xpNext:10,
+      armor:0,regen:1,regenT:0,magnet:80,iframes:0,lastAngle:0,weapons:[],passives:{},
+      rangeMult:1.0,dmgMult:1.0,atkSpeedMult:1.0,wAtkMult:{},wDmgMult:{},wLvDmgMult:1,wLvAtkMult:1};
+  addWeapon('wand');
+}
+
+function update(dt){
+  if(state!=='playing'||paused)return;
+  gameTime+=dt;
+  if(dmgLog.length>0)dmgLog=dmgLog.filter(d=>d.t>gameTime-10);
+
+  if(gameTime>=WIN_TIME&&!endless){
+    state='win';
+    document.getElementById('winScreen').classList.remove('hidden');
+    document.getElementById('winT').textContent='Survived: '+fmt(gameTime);
+    document.getElementById('winK').textContent='Enemies Slain: '+kills;
+    document.getElementById('winLv').textContent='Level Reached: '+pl.level;
+    document.getElementById('winDmg').textContent='Total Damage: '+(totalDmg>=1000?(totalDmg/1000).toFixed(1)+'k':totalDmg);
+    document.getElementById('winXp').textContent='XP Collected: '+totalXp;
+    document.getElementById('winDps').textContent='Avg DPS: '+Math.floor(totalDmg/gameTime);
+    return;
+  }
+
+  wave=Math.min(ETYPES.length-1,Math.floor(gameTime/120));
+  for(const m of HORDE_TIMES){if(!hordeT[m]&&gameTime>=m*60){hordeT[m]=1;spawnHorde();}}
+
+  // Chest: spawn one every 2 minutes
+  const chestDue=Math.floor(gameTime/120);
+  if(chestDue>chestSpawnIdx){chestSpawnIdx=chestDue;spawnChest();}
+
+  // Chest fill logic
+  for(const c of chests){
+    const d=Math.hypot(pl.x-c.x,pl.y-c.y);
+    if(d<CHEST_FILL_R){
+      c.fill=Math.min(1,c.fill+CHEST_FILL_RATE*dt);
+      if(c.fill>=1){
+        c.done=true;
+        burst(c.x,c.y,'#ffcc44',24);burst(c.x,c.y,'#ff8800',14);burst(c.x,c.y,'#ffffff',8);
+        openChest();
+      }
+    } else {
+      c.fill=Math.max(0,c.fill-CHEST_DRAIN_RATE*dt);
+    }
+  }
+  chests=chests.filter(c=>!c.done);
+
+  if(pl.regen){pl.regenT+=dt;if(pl.regenT>=1){pl.regenT-=1;pl.hp=Math.min(pl.maxHp,pl.hp+pl.regen);}}
+
+  const{dx,dy}=getDir();
+  pl.x+=dx*pl.speed*dt;pl.y+=dy*pl.speed*dt;
+  pl.x=Math.max(20,Math.min(WORLD-20,pl.x));
+  pl.y=Math.max(20,Math.min(WORLD-20,pl.y));
+  if(pl.iframes>0)pl.iframes-=dt;
+
+  cam.x=pl.x-W/2;cam.y=pl.y-H/2;
+
+  if(shake.t>0){shake.t-=dt;shake.x=(Math.random()-.5)*6*shake.t;shake.y=(Math.random()-.5)*6*shake.t;}
+  else shake.x=shake.y=0;
+
+  if(pl.finalStandRecoverT>0){
+    pl.finalStandRecoverT-=dt;
+    if(pl.finalStandRecoverT<=0){
+      pl.finalStandRecoverT=0;
+      pl.hp=Math.max(pl.hp,Math.floor(pl.maxHp*.3));
+      burst(pl.x,pl.y,'#ff6688',16);burst(pl.x,pl.y,'#ffffff',10);
+    }
+  }
+
+  if(pl.unholyGround){
+    pl.zoneDropT=(pl.zoneDropT||0)+dt;
+    if((dx||dy)&&pl.zoneDropT>=0.35){pl.zoneDropT=0;corruptedZones.push({x:pl.x,y:pl.y,r:55,life:3.5,maxLife:3.5});}
+  }
+  for(const z of corruptedZones)z.life-=dt;
+  corruptedZones=corruptedZones.filter(z=>z.life>0);
+
+  spawnT+=dt;
+  const spawnRate=Math.max(.30,2.6-gameTime/200);
+  const batchSize=1+Math.floor(gameTime/120);
+  if(spawnT>=spawnRate){spawnT-=spawnRate;for(let i=0;i<batchSize;i++)spawnEnemy();}
+
+  for(const w of pl.weapons) WDEFS[w.type].fire(w,dt);
+
+  for(const e of enemies){
+    if(e.dead)continue;
+    if(e.flash>0)e.flash-=dt;
+
+    if(e.dying){
+      e.dyingT-=dt;
+      e.shakeX=(Math.random()-.5)*10;
+      e.shakeY=(Math.random()-.5)*10;
+      if(Math.random()<0.4&&particles.length<MAX_PARTICLES){
+        particles.push({x:e.x+(Math.random()-.5)*e.r*1.5,y:e.y+(Math.random()-.5)*e.r*1.5,
+          vx:(Math.random()-.5)*18,vy:22+Math.random()*30,
+          life:0.25+Math.random()*0.2,maxLife:0.45,r:1.5+Math.random()*2,col:'#44ff88'});
+      }
+      if(e.dyingT<=0){
+        toxicClouds.push({x:e.x,y:e.y,r:0,maxR:55,life:4.0,maxLife:4.0,dmgT:0});
+        burst(e.x,e.y,'#44ff88',16);
+        e.dead=true;kills++;
+        for(let i=0;i<e.xpC;i++) xpGems.push({x:e.x+(Math.random()-.5)*18,y:e.y+(Math.random()-.5)*18,v:e.xpV,r:e.xpV>3?7:5});
+        if(Math.random()<.008) hpDrops.push({x:e.x,y:e.y});
+        if(Math.random()<.003) magnetDrops.push({x:e.x,y:e.y});
+      }
+      continue;
+    }
+
+    const ex=pl.x-e.x,ey=pl.y-e.y,ed=Math.hypot(ex,ey);
+    e.ang+=dt*1.5;
+    if(e.marked&&(e.markT-=dt)<=0)e.marked=false;
+    if(e.poison>0){
+      e.poisonT=(e.poisonT||0)+dt;
+      if(e.poisonT>=0.5){e.poisonT-=0.5;hitEnemy(e,e.poison*5);}
+    }
+
+    const sm=(pl.unholyGround&&corruptedZones.some(z=>Math.hypot(e.x-z.x,e.y-z.y)<z.r))?.6:1;
+
+    if(e.name==='Ram Rusher'){
+      if(e.chargeState==='charging'){
+        e.x+=e.chargeDx*190*sm*dt;e.y+=e.chargeDy*190*sm*dt;
+        e.chargeTimeLeft-=dt;
+        if(e.chargeTimeLeft<=0){e.chargeState='idle';e.chargeT=2+Math.random()*2;}
+      }else if(e.chargeState==='telegraphing'){
+        e.chargeT-=dt;
+        if(e.chargeT<=0){e.chargeState='charging';e.chargeTimeLeft=1.6;burst(e.x,e.y,'#ff4400',10);}
+      }else{
+        if(ed>0){e.x+=(ex/ed)*e.spd*sm*dt;e.y+=(ey/ed)*e.spd*sm*dt;}
+        e.chargeT-=dt;
+        if(e.chargeT<=0&&ed<420){
+          e.chargeState='telegraphing';e.chargeT=0.65;
+          if(ed>0){e.chargeDx=ex/ed;e.chargeDy=ey/ed;}
+        }
+      }
+    }else if(e.name==='Egg Chucker'){
+      if(ed>0){e.x+=(ex/ed)*e.spd*sm*dt;e.y+=(ey/ed)*e.spd*sm*dt;}
+      e.eggT-=dt;
+      if(e.eggT<=0&&ed<420){
+        e.eggT=2.2+Math.random()*1.2;
+        const flightT=0.8+ed/500;
+        eggs.push({id:++eggId,sx:e.x,sy:e.y,x:e.x,y:e.y,
+          tx:pl.x+(Math.random()-.5)*30,ty:pl.y+(Math.random()-.5)*30,
+          t:0,maxT:flightT,dmg:e.dmg*1.7,done:false});
+      }
+    }else{
+      if(ed>0){e.x+=(ex/ed)*e.spd*sm*dt;e.y+=(ey/ed)*e.spd*sm*dt;}
+    }
+
+    if(pl.iframes<=0&&ed<e.r+14){
+      const dmg=Math.max(1,e.dmg-pl.armor);
+      pl.hp-=dmg;pl.iframes=.55;shake.t=.3;
+      burst(pl.x,pl.y,'#ff2222',5);
+      if(pl.martyrdom){
+        const thornDmg=Math.max(dmg*1.5,15);
+        for(const ne of enemies){if(!ne.dead&&Math.hypot(pl.x-ne.x,pl.y-ne.y)<130)hitEnemy(ne,thornDmg);}
+        auras.push({x:pl.x,y:pl.y,r:0,maxR:130,life:.3,maxLife:.3,rgb:'255,30,80'});
+      }
+      checkPlayerDeath();
+    }
+  }
+  enemies=enemies.filter(e=>!e.dead);
+
+  for(const eg of eggs){
+    eg.t+=dt;
+    const p=Math.min(1,eg.t/eg.maxT);
+    eg.x=eg.sx+(eg.tx-eg.sx)*p;
+    eg.y=eg.sy+(eg.ty-eg.sy)*p;
+    if(!eg.done&&particles.length<MAX_PARTICLES){
+      const arcH=55*Math.sin(Math.PI*p);
+      for(let i=0;i<2;i++){
+        particles.push({x:eg.x+(Math.random()-.5)*5,y:eg.y-arcH+(Math.random()-.5)*4,
+          vx:(Math.random()-.5)*22,vy:-10-Math.random()*16,
+          life:0.1+Math.random()*0.1,maxLife:0.2,r:1.5+Math.random()*2,
+          col:Math.random()>.5?'#ff5500':'#ffaa00'});
+      }
+    }
+    if(eg.t>=eg.maxT&&!eg.done){
+      eg.done=true;
+      if(Math.hypot(pl.x-eg.tx,pl.y-eg.ty)<28&&pl.iframes<=0){
+        const dmg=Math.max(1,eg.dmg-pl.armor);
+        pl.hp-=dmg;pl.iframes=.4;shake.t=.2;
+        burst(pl.x,pl.y,'#ff2222',5);checkPlayerDeath();
+      }
+      burst(eg.tx,eg.ty,'#ff5500',10);
+      burst(eg.tx,eg.ty,'#ffcc00',6);
+    }
+  }
+  eggs=eggs.filter(eg=>!eg.done);
+
+  for(const tc of toxicClouds){
+    tc.life-=dt;
+    if(tc.r<tc.maxR)tc.r=Math.min(tc.maxR,tc.r+tc.maxR*(dt/0.5));
+    tc.dmgT-=dt;
+    if(tc.dmgT<=0){
+      tc.dmgT=0.5;
+      if(Math.hypot(pl.x-tc.x,pl.y-tc.y)<tc.r+10&&pl.iframes<=0){
+        const dmg=Math.max(1,8-pl.armor);
+        pl.hp-=dmg;pl.iframes=.3;
+        burst(pl.x,pl.y,'#44ff88',3);checkPlayerDeath();
+      }
+    }
+  }
+  toxicClouds=toxicClouds.filter(tc=>tc.life>0);
+
+  for(const p of projs){
+    p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;
+    if(p.type==='axe'){p.spin+=dt*9;p.vy+=220*dt;}
+    if(p.type==='flame'&&particles.length<MAX_PARTICLES){
+      for(let i=0;i<3;i++){
+        particles.push({x:p.x+(Math.random()-.5)*p.r*1.5,y:p.y+(Math.random()-.5)*p.r*1.5,
+          vx:(Math.random()-.5)*45,vy:(Math.random()-.5)*45-20,
+          life:.14+Math.random()*.12,maxLife:.26,r:2+Math.random()*4,
+          col:Math.random()>.4?'#ff5500':'#ffaa00'});
+      }
+    }
+    if(Math.hypot(p.x-p.ox,p.y-p.oy)>p.maxDist){p.life=-1;continue;}
+    for(const e of enemies){
+      if(e.dead)continue;
+      if(Math.hypot(p.x-e.x,p.y-e.y)<e.r+p.r){
+        hitEnemy(e,p.dmg);p.pierced++;
+        if(p.pierced>p.pierce){p.life=-1;break;}
+      }
+    }
+  }
+  projs=projs.filter(p=>p.life>0);
+
+  for(const a of auras){a.life-=dt;a.r=a.maxR*(1-a.life/a.maxLife);}
+  auras=auras.filter(a=>a.life>0);
+
+  for(const l of lightnings)l.life-=dt;
+  lightnings=lightnings.filter(l=>l.life>0);
+
+  for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;p.vx*=.92;p.vy*=.92;}
+  if(particles.length>MAX_PARTICLES)particles.splice(0,particles.length-MAX_PARTICLES);
+  particles=particles.filter(p=>p.life>0);
+
+  for(const d of dmgNums){d.y+=d.vy*dt;d.life-=dt;}
+  dmgNums=dmgNums.filter(d=>d.life>0);
+
+  if(vacuumT>0)vacuumT-=dt;
+
+  for(const g of xpGems){
+    const gx=pl.x-g.x,gy=pl.y-g.y,gd=Math.hypot(gx,gy);
+    if(vacuumT>0||gd<pl.magnet){const pull=vacuumT>0?1200:Math.min(350,350*(1-gd/pl.magnet)+80);g.x+=(gx/gd)*pull*dt;g.y+=(gy/gd)*pull*dt;}
+    if(gd<18){addXP(g.v);g.done=true;}
+  }
+  xpGems=xpGems.filter(g=>!g.done);
+
+  for(const h of hpDrops){
+    if(Math.hypot(pl.x-h.x,pl.y-h.y)<26){pl.hp=Math.min(pl.maxHp,pl.hp+35);h.done=true;burst(pl.x,pl.y,'#ff4466',8);}
+  }
+  hpDrops=hpDrops.filter(h=>!h.done);
+
+  for(const m of magnetDrops){
+    if(Math.hypot(pl.x-m.x,pl.y-m.y)<26){
+      m.done=true;vacuumT=3.5;
+      burst(pl.x,pl.y,'#44ccff',14);burst(pl.x,pl.y,'#aa66ff',10);
+    }
+  }
+  magnetDrops=magnetDrops.filter(m=>!m.done);
+
+  updateHUD();
+}
+
+function loop(ts){
+  const dt=Math.min((ts-lastTS)/1000,.05);
+  lastTS=ts;
+  if(state==='playing'||state==='levelup'){update(dt);render();}
+  requestAnimationFrame(loop);
+}
+
+function resumeGame(){
+  paused=false;
+  document.getElementById('pauseBanner').style.display='none';
+}
+
+function goEndless(){
+  endless=true;state='playing';
+  document.getElementById('winScreen').classList.add('hidden');
+}
+
+function quitToMenu(){
+  state='menu';paused=false;
+  document.getElementById('pauseBanner').style.display='none';
+  ['goScreen','winScreen','lvlScreen'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+  document.getElementById('menuScreen').classList.remove('hidden');
+}
+
+function startGame(){
+  state='playing';gameTime=0;kills=0;pendingLU=0;
+  enemies=[];projs=[];xpGems=[];auras=[];particles=[];lightnings=[];hpDrops=[];dmgNums=[];toxicClouds=[];eggs=[];magnetDrops=[];dmgLog=[];
+  spawnT=0;eggId=0;hordeT={};paused=false;wave=0;totalDmg=0;totalXp=0;vacuumT=0;endless=false;chests=[];chestSpawnIdx=0;corruptedZones=[];
+  _wbSig='';
+  document.getElementById('pauseBanner').style.display='none';
+  ['menuScreen','goScreen','winScreen','lvlScreen'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+  initPlayer();spawnChest();updateHUD();
+}
+
+lastTS=performance.now();
+requestAnimationFrame(loop);
