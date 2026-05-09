@@ -573,7 +573,7 @@ function startGame(){
 lastTS=performance.now();
 requestAnimationFrame(loop);
 
-if(navigator.maxTouchPoints>0){
+if(/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)){
   const mc=document.getElementById('menuControls');
   if(mc)mc.textContent='Tap left or right to set your joystick hand';
   const sb=document.getElementById('startBtn');

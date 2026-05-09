@@ -2,19 +2,10 @@ const keys={};
 const JRADIUS=65;
 const JBASE={x:665,y:465};
 const joystick={active:false,id:-1,knobX:665,knobY:465,dx:0,dy:0};
-let touchDevice=navigator.maxTouchPoints>0;
+let touchDevice=false;
 let joySide='right';
 let joyActivated=false;
 let joyActivatedAt=0;
-
-if(touchDevice){
-  document.addEventListener('DOMContentLoaded',()=>{
-    ['muteBtn','pauseBtn'].forEach(id=>{
-      const el=document.getElementById(id);
-      if(el)el.style.visibility='hidden';
-    });
-  });
-}
 
 function _applyJoySide(side){
   joySide=side;
@@ -55,7 +46,13 @@ function resetJoystick(){
 canvas.addEventListener('pointerdown',e=>{
   if(e.pointerType==='mouse')return;
   e.preventDefault();
-  touchDevice=true;
+  if(!touchDevice){
+    touchDevice=true;
+    ['muteBtn','pauseBtn'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el)el.style.visibility='hidden';
+    });
+  }
   if(!joystick.active){
     const p=toCanvas(e.clientX,e.clientY);
     _activateJoy(p.x<400?'left':'right');
