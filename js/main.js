@@ -267,7 +267,11 @@ function update(dt){
   spawnT+=dt;
   const spawnRate=Math.max(1.0,2.8-gameTime/200);
   const batchSize=Math.min(2,1+Math.floor(gameTime/240));
-  if(spawnT>=spawnRate&&enemies.length<100){spawnT-=spawnRate;for(let i=0;i<batchSize;i++)spawnEnemy();}
+  if(enemies.length>75){
+    enemies.sort((a,b)=>Math.hypot(b.x-pl.x,b.y-pl.y)-Math.hypot(a.x-pl.x,a.y-pl.y));
+    enemies.splice(0,enemies.length-75);
+  }
+  if(spawnT>=spawnRate&&enemies.length<75){spawnT-=spawnRate;for(let i=0;i<batchSize;i++)spawnEnemy();}
 
   for(const w of pl.weapons) WDEFS[w.type].fire(w,dt);
 
