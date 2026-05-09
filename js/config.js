@@ -21,7 +21,7 @@ const WDEFS={
       w.t=0;
       for(let i=0;i<s.cnt;i++){
         const a=Math.atan2(tgt.y-pl.y,tgt.x-pl.x)+(i-(s.cnt-1)/2)*.18;
-        spawnProj(pl.x,pl.y,Math.cos(a)*s.spd,Math.sin(a)*s.spd,s.dmg*(pl.wDmgMult[w.type]||1),s.pierce,'wand',8,'#bb33ff','#7700cc',220*pl.rangeMult);
+        spawnProj(pl.x,pl.y,Math.cos(a)*s.spd,Math.sin(a)*s.spd,s.dmg*(pl.wDmgMult[w.type]||1),s.pierce,'wand',8,'#bb33ff','#7700cc',220*pl.rangeMult,26);
       }
     }
   },

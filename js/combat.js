@@ -1,12 +1,12 @@
 const MAX_PARTICLES=400;
 
-function spawnProj(x,y,vx,vy,dmg,pierce,type,r,col,glow,maxDist=Infinity){
-  projs.push({x,y,vx,vy,dmg,pierce,pierced:0,life:2,r,col,glow,type,spin:0,ox:x,oy:y,maxDist});
+function spawnProj(x,y,vx,vy,dmg,pierce,type,r,col,glow,maxDist=Infinity,aoe=0){
+  projs.push({x,y,vx,vy,dmg,pierce,pierced:0,life:2,r,col,glow,type,spin:0,ox:x,oy:y,maxDist,aoe});
 }
 
 function hitEnemy(e,dmg){
   if(e.dead)return;
-  let mult=(pl.dmgMult||1)*(pl.wLvDmgMult||1)*0.8;
+  let mult=(pl.dmgMult||1)*(pl.wLvDmgMult||1)*0.8*(pl.weakenMult||1);
   if(e.marked){mult*=2;e.marked=false;e.markT=0;}
   const actual=Math.max(1,dmg*mult);
   totalDmg+=Math.floor(actual);

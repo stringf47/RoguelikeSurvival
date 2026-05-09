@@ -26,7 +26,7 @@ function spawnSeal(){
     if(Math.hypot(x-pl.x,y-pl.y)>400)break;
   }
   const iter=Math.max(0,Math.floor((gameTime-60)/120));
-  const hp=(200+wave*150)*2;
+  const hp=(200+wave*150)*2*(iter===0?0.7:1);
   sealSpottedT=2;
   seals.push({x,y,id:++eid,timeLeft:60,hp,maxHp:hp,flash:0,fireT:1.5,
     type:'ss',iteration:iter,spinAngle:0,dead:false,isSeal:true});
@@ -415,7 +415,15 @@ function update(dt){
     for(const e of enemies){
       if(e.dead)continue;
       if(Math.hypot(p.x-e.x,p.y-e.y)<e.r+p.r){
-        hitEnemy(e,p.dmg);p.pierced++;
+        hitEnemy(e,p.dmg);
+        if(p.aoe>0){
+          for(const ne of enemies){
+            if(ne.dead||ne===e)continue;
+            if(Math.hypot(p.x-ne.x,p.y-ne.y)<p.aoe+ne.r)hitEnemy(ne,p.dmg*0.4);
+          }
+          burst(p.x,p.y,p.col,4);
+        }
+        p.pierced++;
         if(p.pierced>p.pierce){p.life=-1;break;}
       }
     }
