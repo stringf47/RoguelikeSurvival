@@ -26,7 +26,7 @@ function spawnSeal(){
     if(Math.hypot(x-pl.x,y-pl.y)>400)break;
   }
   const iter=Math.max(0,Math.floor((gameTime-60)/120));
-  const hp=(200+wave*150)*2*(iter===0?0.7:1);
+  const hp=(200+wave*150)*2;
   sealSpottedT=2;
   seals.push({x,y,id:++eid,timeLeft:60,hp,maxHp:hp,flash:0,fireT:1.5,
     type:'ss',iteration:iter,spinAngle:0,dead:false,isSeal:true});
