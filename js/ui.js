@@ -133,16 +133,39 @@ function updateHUD(){
   _chestInd.style.display=hasChest?'block':'none';
 
   // Seal banner (timer pill) + message below stats
-  if(typeof seals!=='undefined'&&seals.length>0){
+  const activeSeal=typeof seals!=='undefined'&&seals.length>0?seals[0]:null;
+  const debuffLabel=crimsonCrossDebuff==='weakening'?'WEAKENING — -30% damage on hit':
+    crimsonCrossDebuff==='slow'?'SLOW — -20% speed on hit':
+    crimsonCrossDebuff==='bleed'?'BLEED — damage over time on hit':'';
+  if(activeSeal&&activeSeal.type==='cc'){
     _sealBanner.style.display='flex';
     _sealBanner.classList.remove('buffed');
-    _sealTimer.textContent='⛧ '+Math.ceil(seals[0].timeLeft)+'s';
+    _sealTimer.style.color='#ff6666';
+    _sealTimer.textContent='✝ '+Math.ceil(activeSeal.timeLeft)+'s';
+    _sealMessage.style.display='block';
+    _sealMessage.style.color='#ff5555';
+    const dl=activeSeal.debuff==='weakening'?'WEAKENING':activeSeal.debuff==='slow'?'SLOW':'BLEED';
+    _sealMessage.innerHTML='✝ DESTROY THE CRIMSON CROSS<br><span style="color:#aa3333;font-size:9px;letter-spacing:1px">Upon survival, enemies apply '+dl+' on hit</span>';
+  }else if(activeSeal){
+    _sealBanner.style.display='flex';
+    _sealBanner.classList.remove('buffed');
+    _sealTimer.style.color='#dd99ff';
+    _sealTimer.textContent='⛧ '+Math.ceil(activeSeal.timeLeft)+'s';
     _sealMessage.style.display='block';
     _sealMessage.style.color='#cc77ff';
     _sealMessage.innerHTML='⛧ DESTROY THE STRENGTHENING SEAL<br><span style="color:#9955cc;font-size:9px;letter-spacing:1px">Upon survival, strengthens enemies for 1 minute</span>';
+  }else if(typeof crimsonCrossBuffActive!=='undefined'&&crimsonCrossBuffActive){
+    _sealBanner.style.display='flex';
+    _sealBanner.classList.add('buffed');
+    _sealTimer.style.color='#ff8866';
+    _sealTimer.textContent='✝ CURSED';
+    _sealMessage.style.display='block';
+    _sealMessage.style.color='#ff4444';
+    _sealMessage.innerHTML='✝ '+debuffLabel.toUpperCase()+'<br><span style="font-size:9px;color:#aa3333">'+fmt(crimsonCrossBuffT)+' remaining</span>';
   }else if(typeof sealBuffActive!=='undefined'&&sealBuffActive){
     _sealBanner.style.display='flex';
     _sealBanner.classList.add('buffed');
+    _sealTimer.style.color='#dd99ff';
     _sealTimer.textContent='☠ STRENGTHENED';
     _sealMessage.style.display='block';
     _sealMessage.style.color='#ff6688';

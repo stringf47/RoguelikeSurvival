@@ -25,12 +25,35 @@ function spawnSeal(){
     y=200+Math.random()*(WORLD-400);
     if(Math.hypot(x-pl.x,y-pl.y)>400)break;
   }
-  const w=wave;
-  const iter=Math.max(0,sealSpawnIdx-1);
-  const hp=(200+w*150)*2;
+  const iter=Math.max(0,Math.floor((gameTime-60)/120));
+  const hp=(200+wave*150)*2;
   sealSpottedT=2;
   seals.push({x,y,id:++eid,timeLeft:60,hp,maxHp:hp,flash:0,fireT:1.5,
-    wave:w,iteration:iter,spinAngle:0,dead:false,isSeal:true});
+    type:'ss',iteration:iter,spinAngle:0,dead:false,isSeal:true});
+}
+
+function spawnCrimsonCross(){
+  let x,y;
+  for(let i=0;i<16;i++){
+    x=200+Math.random()*(WORLD-400);
+    y=200+Math.random()*(WORLD-400);
+    if(Math.hypot(x-pl.x,y-pl.y)>400)break;
+  }
+  const iter=Math.max(0,Math.floor((gameTime-180)/120));
+  const hp=(200+wave*150)*2;
+  const debuffs=['weakening','slow','bleed'];
+  const debuff=debuffs[Math.floor(Math.random()*debuffs.length)];
+  ccSpottedT=2;
+  seals.push({x,y,id:++eid,timeLeft:60,hp,maxHp:hp,flash:0,
+    type:'cc',iteration:iter,debuff,orbitAngle:0,fireT:0,dead:false,isSeal:true});
+}
+
+function activateCrimsonCrossBuff(debuff){
+  if(crimsonCrossBuffActive)return;
+  crimsonCrossBuffActive=true;crimsonCrossBuffT=60;crimsonCrossDebuff=debuff;
+  shake.t=.9;
+  burst(pl.x,pl.y,'#cc1111',20);burst(pl.x,pl.y,'#ff4422',14);
+  auras.push({x:pl.x,y:pl.y,r:0,maxR:400,life:.6,maxLife:.6,rgb:'220,17,17'});
 }
 
 function spawnChest(){
@@ -69,7 +92,7 @@ function initPlayer(){
   pl={x:WORLD/2,y:WORLD/2,hp:150,maxHp:150,speed:160,level:1,xp:0,xpNext:10,
       armor:0,regen:0,regenT:0,magnet:80,iframes:0,lastAngle:0,weapons:[],passives:{},infected:0,infectedT:0,
       rangeMult:1.0,dmgMult:1.0,atkSpeedMult:1.0,wAtkMult:{},wDmgMult:{},wLvDmgMult:1,wLvAtkMult:1,
-      leanAng:0,leanVel:0};
+      leanAng:0,leanVel:0,weakenedT:0,weakenMult:1,slowedT:0,bleedT:0};
   addWeapon('wand');
 }
 
@@ -77,7 +100,21 @@ function update(dt){
   if(state!=='playing'||paused)return;
   gameTime+=dt;
   if(sealSpottedT>0)sealSpottedT-=dt;
+  if(ccSpottedT>0)ccSpottedT-=dt;
+  sealVignette+=((seals.some(s=>s.type==='ss')?1:0)-sealVignette)*Math.min(1,dt*1.8);
+  crimsonVignette+=((seals.some(s=>s.type==='cc')?1:0)-crimsonVignette)*Math.min(1,dt*1.8);
   if(sealBuffActive&&sealBuffT>0){sealBuffT-=dt;if(sealBuffT<=0){sealBuffActive=false;sealBuffT=0;}}
+  if(crimsonCrossBuffActive&&crimsonCrossBuffT>0){crimsonCrossBuffT-=dt;if(crimsonCrossBuffT<=0){crimsonCrossBuffActive=false;crimsonCrossBuffT=0;crimsonCrossDebuff='';}}
+  if((pl.weakenedT||0)>0){pl.weakenedT-=dt;pl.weakenMult=0.7;}else{pl.weakenMult=1;}
+  if((pl.slowedT||0)>0)pl.slowedT-=dt;
+  if((pl.bleedT||0)>0){
+    pl.bleedT-=dt;pl.hp-=6*dt;
+    if(Math.random()<dt*10&&particles.length<MAX_PARTICLES)
+      particles.push({x:pl.x+(Math.random()-.5)*14,y:pl.y+(Math.random()-.5)*10,
+        vx:(Math.random()-.5)*12,vy:20+Math.random()*18,
+        life:.3+Math.random()*.2,maxLife:.5,r:1.5+Math.random()*1.5,col:'#cc1111'});
+    checkPlayerDeath();
+  }
   if(dmgLog.length>0)dmgLog=dmgLog.filter(d=>d.t>gameTime-10);
 
   if(gameTime>=WIN_TIME&&!endless){
@@ -101,32 +138,72 @@ function update(dt){
   const chestDue=Math.floor(gameTime/120);
   if(chestDue>chestSpawnIdx){chestSpawnIdx=chestDue;spawnChest();}
 
-  // Seal: spawn at 1 min, then every 2 min (1,3,5,7...), only one active at a time
+  // SS: 1,5,9... min  CC: 3,7,11... min  (each type every 4 min, alternating)
   if(gameTime>=60&&seals.length===0){
-    const sealDue=1+Math.floor((gameTime-60)/120);
-    if(sealDue>sealSpawnIdx){sealSpawnIdx=sealDue;spawnSeal();}
+    const ssDue=1+Math.floor((gameTime-60)/240);
+    if(ssDue>sealSpawnIdx){sealSpawnIdx=ssDue;spawnSeal();}
+  }
+  if(gameTime>=180&&seals.length===0){
+    const ccDue=1+Math.floor((gameTime-180)/240);
+    if(ccDue>ccSpawnIdx){ccSpawnIdx=ccDue;spawnCrimsonCross();}
   }
   for(const s of seals){
     if(s.dead)continue;
     s.timeLeft-=dt;
-    if(s.timeLeft<=0){s.dead=true;activateSealBuff();continue;}
+    if(s.timeLeft<=0){
+      s.dead=true;
+      if(s.type==='cc')activateCrimsonCrossBuff(s.debuff);
+      else activateSealBuff();
+      continue;
+    }
     s.flash=Math.max(0,s.flash-dt);
-    s.fireT-=dt;
-    if(s.fireT<=0){
+    if(s.type==='cc'){
       const iter=s.iteration||0;
-      const shots=4+iter;
-      const fireInterval=Math.max(0.9,2.0-iter*0.25);
-      s.fireT=fireInterval;
-      const spd=140+iter*28;
-      const dmg=16+iter*10;
-      s.spinAngle+=Math.PI*2/shots*0.5;
-      for(let i=0;i<shots;i++){
-        const a=s.spinAngle+(i/shots)*Math.PI*2;
-        sealProjs.push({x:s.x,y:s.y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,dmg,r:7,life:5});
+      const numPts=Math.min(6,2+Math.floor(iter/2));
+      const fireInterval=Math.max(0.1,0.25-iter*0.02);
+      const orbitSpd=1.2+iter*0.18;
+      const spd=160+iter*22;
+      const dmg=12+iter*7;
+      s.orbitAngle+=orbitSpd*dt;
+      s.fireT-=dt;
+      if(s.fireT<=0){
+        s.fireT=fireInterval;
+        for(let i=0;i<numPts;i++){
+          const a=s.orbitAngle+(i/numPts)*Math.PI*2;
+          const ox=s.x+Math.cos(a)*38,oy=s.y+Math.sin(a)*38;
+          sealProjs.push({x:ox,y:oy,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,dmg,r:6,life:4,crimson:true});
+        }
+      }
+    }else{
+      s.fireT-=dt;
+      if(s.fireT<=0){
+        const iter=s.iteration||0;
+        const shots=4+iter;
+        const fireInterval=Math.max(0.9,2.0-iter*0.25);
+        s.fireT=fireInterval;
+        const spd=140+iter*28;
+        const dmg=16+iter*10;
+        s.spinAngle+=Math.PI*2/shots*0.5;
+        for(let i=0;i<shots;i++){
+          const a=s.spinAngle+(i/shots)*Math.PI*2;
+          sealProjs.push({x:s.x,y:s.y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,dmg,r:7,life:5});
+        }
       }
     }
   }
   seals=seals.filter(s=>!s.dead&&s.timeLeft>0);
+
+  // Seal contact damage
+  for(const s of seals){
+    if(s.dead)continue;
+    if(pl.iframes<=0&&Math.hypot(pl.x-s.x,pl.y-s.y)<22){
+      const dmg=Math.max(1,20-pl.armor);
+      pl.hp-=dmg;pl.iframes=.55;shake.t=.3;
+      playHitSound();
+      burst(pl.x,pl.y,s.type==='cc'?'#ff2222':'#aa44ff',5);
+      checkPlayerDeath();
+    }
+  }
 
   // Chest fill logic
   for(const c of chests){
@@ -157,7 +234,8 @@ function update(dt){
   }
 
   const{dx,dy}=getDir();
-  if(!playerFrozen){pl.x+=dx*pl.speed*dt;pl.y+=dy*pl.speed*dt;}
+  const slowMult=(pl.slowedT||0)>0?0.8:1;
+  if(!playerFrozen){pl.x+=dx*pl.speed*slowMult*dt;pl.y+=dy*pl.speed*slowMult*dt;}
   const targetLean=dx*0.26;
   pl.leanVel+=(targetLean-pl.leanAng)*55*dt-pl.leanVel*9*dt;
   pl.leanAng+=pl.leanVel*dt;
@@ -187,7 +265,7 @@ function update(dt){
   corruptedZones=corruptedZones.filter(z=>z.life>0);
 
   spawnT+=dt;
-  const spawnRate=Math.max(.55,2.8-gameTime/200);
+  const spawnRate=Math.max(1.0,2.8-gameTime/200);
   const batchSize=Math.min(2,1+Math.floor(gameTime/240));
   if(spawnT>=spawnRate&&enemies.length<100){spawnT-=spawnRate;for(let i=0;i<batchSize;i++)spawnEnemy();}
 
@@ -244,13 +322,14 @@ function update(dt){
         }
       }
     }else if(e.name==='Skeletal Scarecrow'){
+      if((e.appearT||0)>0)e.appearT=Math.max(0,e.appearT-dt);
       if(e.zonePhase===null){
         e.teleportT-=dt;
         if(e.teleportT<=0){
           const ta=Math.random()*Math.PI*2,td=90+Math.random()*110;
           e.x=Math.max(60,Math.min(WORLD-60,pl.x+Math.cos(ta)*td));
           e.y=Math.max(60,Math.min(WORLD-60,pl.y+Math.sin(ta)*td));
-          e.zoneX=e.x;e.zoneY=e.y;
+          e.zoneX=e.x;e.zoneY=e.y;e.appearT=0.5;
           e.zonePhase='telegraph';e.zoneT=1.8;
           burst(e.x,e.y,'#c8c4a0',14);
           auras.push({x:e.x,y:e.y,r:0,maxR:80,life:.35,maxLife:.35,rgb:'200,196,160'});
@@ -258,14 +337,14 @@ function update(dt){
       }else{
         e.zoneT-=dt;
         if(e.zonePhase==='telegraph'&&e.zoneT<=0){
-          e.zonePhase='active';e.zoneT=0.3;
+          e.zonePhase='active';e.zoneT=0.25;
           if(pl.iframes<=0&&Math.hypot(pl.x-e.zoneX,pl.y-e.zoneY)<120){
             const dmg=Math.max(1,e.dmg*enemyDmgMult-pl.armor);
             pl.hp-=dmg;pl.iframes=.7;shake.t=.45;
             playHitSound();burst(pl.x,pl.y,'#ff2222',10);checkPlayerDeath();
           }
         }else if(e.zonePhase==='active'&&e.zoneT<=0){
-          e.zonePhase='fade';e.zoneT=0.5;
+          e.zonePhase='fade';e.zoneT=1.5;
         }else if(e.zonePhase==='fade'&&e.zoneT<=0){
           e.zonePhase=null;e.teleportT=2.5+Math.random()*2;
         }
@@ -290,6 +369,11 @@ function update(dt){
       playHitSound();
       burst(pl.x,pl.y,'#ff2222',5);
       if(e.name==='Plague Rat'){pl.infected=Math.min(5,pl.infected+1);pl.infectedT=4;}
+      if(crimsonCrossBuffActive){
+        if(crimsonCrossDebuff==='weakening')pl.weakenedT=4;
+        else if(crimsonCrossDebuff==='slow')pl.slowedT=4;
+        else if(crimsonCrossDebuff==='bleed')pl.bleedT=5;
+      }
       if(pl.martyrdom){
         const thornDmg=Math.max(dmg*1.5,15);
         for(const ne of enemies){if(!ne.dead&&Math.hypot(pl.x-ne.x,pl.y-ne.y)<130)hitEnemy(ne,thornDmg);}
@@ -452,7 +536,8 @@ function quitToMenu(){
 function startGame(){
   state='playing';gameTime=0;kills=0;pendingLU=0;
   enemies=[];projs=[];xpGems=[];auras=[];particles=[];lightnings=[];hpDrops=[];dmgNums=[];toxicClouds=[];magnetDrops=[];dmgLog=[];
-  spawnT=0;hordeT={};sealSpottedT=0;sealBuffT=0;paused=false;wave=0;bgWave=0;totalDmg=0;totalXp=0;vacuumT=0;endless=false;chests=[];chestSpawnIdx=0;seals=[];sealSpawnIdx=0;sealProjs=[];sealBuffActive=false;corruptedZones=[];enemyDmgMult=1;
+  spawnT=0;hordeT={};sealSpottedT=0;ccSpottedT=0;sealBuffT=0;sealVignette=0;crimsonVignette=0;
+  ccSpawnIdx=0;crimsonCrossBuffActive=false;crimsonCrossBuffT=0;crimsonCrossDebuff='';paused=false;wave=0;bgWave=0;totalDmg=0;totalXp=0;vacuumT=0;endless=false;chests=[];chestSpawnIdx=0;seals=[];sealSpawnIdx=0;sealProjs=[];sealBuffActive=false;corruptedZones=[];enemyDmgMult=1;
   _wbSig='';
   _setPause(false);
   ['menuScreen','goScreen','winScreen','lvlScreen'].forEach(id=>document.getElementById(id).classList.add('hidden'));

@@ -192,7 +192,7 @@ const WDEFS={
       if(lv%3===0)return'Extra fireball · Damage & size up';
       return'Damage, size & cooldown up';
     },
-    stats(lv){return{cd:Math.max(.4,2.6-lv*.22),dmg:10+lv*5,r:16+lv*3,spd:200+lv*14,cnt:1+Math.floor(lv/3)}},
+    stats(lv){return{cd:Math.max(.4,2.6-lv*.22),dmg:(10+lv*5)*0.35,r:16+lv*3,spd:200+lv*14,cnt:1+Math.floor(lv/3)}},
     fire(w,dt){
       const s=WDEFS.flame.stats(w.level);w.t+=dt;
       if(w.t<s.cd/wSpd(w))return;
