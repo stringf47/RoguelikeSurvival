@@ -85,8 +85,10 @@ function render(){
   // Particles
   for(const p of particles){
     const a=p.life/p.maxLife;
+    if(p.glow){ctx.shadowColor=p.glow;ctx.shadowBlur=p.r*3;}
     ctx.beginPath();ctx.arc(p.x,p.y,p.r*a,0,Math.PI*2);
-    ctx.fillStyle=p.col+(Math.floor(a*200).toString(16).padStart(2,'0'));ctx.fill();
+    ctx.fillStyle=p.col+(Math.floor(a*220).toString(16).padStart(2,'0'));ctx.fill();
+    if(p.glow){ctx.shadowBlur=0;}
   }
 
   // Egg landing telegraphs
@@ -223,15 +225,22 @@ function render(){
 }
 
 function drawBG(){
+  const wi=Math.min(Math.floor(bgWave),BG_THEMES.length-2);
+  const wf=Math.max(0,Math.min(1,bgWave-wi));
+  const t0=BG_THEMES[wi],t1=BG_THEMES[wi+1];
+  const ca=lerpColor(t0.a,t1.a,wf),cb=lerpColor(t0.b,t1.b,wf);
+  const cc=lerpColor(t0.c,t1.c,wf),cd=lerpColor(t0.d,t1.d,wf);
+  const cbrd=lerpColor(t0.brd,t1.brd,wf);
+
   const ts=80;
   const sx=Math.floor(cam.x/ts)*ts,sy=Math.floor(cam.y/ts)*ts;
   for(let tx=sx;tx<cam.x+W+ts;tx+=ts){
     for(let ty=sy;ty<cam.y+H+ts;ty+=ts){
-      ctx.fillStyle=((Math.floor(tx/ts)+Math.floor(ty/ts))%2===0)?'#2d1a4a':'#341f54';
+      ctx.fillStyle=((Math.floor(tx/ts)+Math.floor(ty/ts))%2===0)?ca:cb;
       ctx.fillRect(tx,ty,ts,ts);
     }
   }
-  ctx.fillStyle='#4a2a6e';
+  ctx.fillStyle=cc;
   for(let tx=sx;tx<cam.x+W+ts;tx+=ts){
     for(let ty=sy;ty<cam.y+H+ts;ty+=ts){
       const seed=(tx*374761+ty*668265)&0xfffff;
@@ -240,14 +249,14 @@ function drawBG(){
       const seed2=(tx*112741+ty*334217)&0xfffff;
       if(seed2%7===0){
         const fx2=tx+(seed2%70)+5,fy2=ty+((seed2>>3)%70)+5;
-        ctx.fillStyle='#7a3a9e';
+        ctx.fillStyle=cd;
         ctx.fillRect(fx2-1,fy2-3,2,6);
         ctx.fillRect(fx2-3,fy2-1,6,2);
-        ctx.fillStyle='#4a2a6e';
+        ctx.fillStyle=cc;
       }
     }
   }
-  ctx.strokeStyle='#6a2a8e';ctx.lineWidth=5;
+  ctx.strokeStyle=cbrd;ctx.lineWidth=5;
   ctx.strokeRect(0,0,WORLD,WORLD);
   ctx.shadowBlur=0;
 }
@@ -553,7 +562,7 @@ function drawChestArrow(chest){
   ctx.shadowBlur=0;
   ctx.font='bold 11px Georgia';ctx.textAlign='center';ctx.textBaseline='top';
   ctx.fillStyle='#ffcc44';
-  ctx.fillText(dist+'m',0,16);
+  ctx.fillText(Math.floor(dist/4)+'m',0,16);
 
   ctx.restore();
 }

@@ -36,40 +36,48 @@ function genChestChoices(){
 function openChest(){
   state='levelup';
   for(const k in keys)keys[k]=false;
+  stopAllDrones();playChestSound();
   currentChoices=genChestChoices();
-  selectedCardIdx=0;
+  selectedCardIdx=Math.floor(currentChoices.length/2);
+  const ls=document.getElementById('lvlScreen');
+  ls.classList.add('chest-mode');
+  document.getElementById('lvlTitle').textContent='✦ GIFT OF THE FARM ✦';
   const cc=document.getElementById('cardContainer');
   cc.innerHTML='';
   for(const c of currentChoices){
     const curLv=c.isW?(pl.weapons.find(w=>w.type===c.key)?.level||0):(pl.passives[c.key]||0);
     const nLv=curLv+1;const isNew=c.isW&&curLv===0;
     const el=document.createElement('div');el.className='card';
-    if(c.isLegendary){el.style.borderColor='#cc8833';el.style.boxShadow='0 0 22px #cc883355';}
     el.innerHTML=`<div class="ci">${c.icon}</div>
-      <div class="badge" style="${c.isLegendary?'background:#2a1500;color:#cc8833':''}">${c.isLegendary?'LEGENDARY':isNew?'NEW':'LVL '+nLv}</div>
-      <div class="cn" style="${c.isLegendary?'color:#cc8833':''}">${c.name}</div>
+      <div class="badge">${isNew?'NEW':'LVL '+nLv}</div>
+      <div class="cn">${c.name}</div>
       <div class="cd">${c.desc}</div>`;
     el.onclick=()=>pickUpgrade(c);
     cc.appendChild(el);
   }
-  document.getElementById('lvlScreen').classList.remove('hidden');
+  ls.classList.remove('hidden');
   syncCardSelection();
 }
+
+let luWaving=false;
+let playerFrozen=false;
 
 function addXP(v){
   totalXp+=v;
   pl.xp+=v;
   while(pl.xp>=pl.xpNext){pl.xp-=pl.xpNext;pl.level++;pl.xpNext=XP_CURVE(pl.level);pendingLU++;}
-  if(pendingLU>0&&state==='playing')triggerLU();
+  if(pendingLU>0&&state==='playing'&&!luWaving)triggerLU();
 }
 
 function triggerLU(){
   if(pendingLU<=0)return;
   pendingLU--;
-  state='levelup';
   for(const k in keys)keys[k]=false;
+  stopAllDrones();playLevelUpSound();
+
+  // Pre-build cards (screen stays hidden until wave finishes)
   currentChoices=genChoices(3);
-  selectedCardIdx=0;
+  selectedCardIdx=Math.floor(currentChoices.length/2);
   const cc=document.getElementById('cardContainer');
   cc.innerHTML='';
   for(const c of currentChoices){
@@ -81,7 +89,67 @@ function triggerLU(){
     el.onclick=()=>pickUpgrade(c);
     cc.appendChild(el);
   }
-  document.getElementById('lvlScreen').classList.remove('hidden');
+
+  luWaving=true;
+  playerFrozen=true;
+  _levelUpWave();
+  setTimeout(()=>{
+    luWaving=false;
+    if(state==='playing')_showLevelUpMenu();
+  },500);
+}
+
+function _levelUpWave(){
+  for(const e of enemies) e.kbHit=false;
+  const COLS=['#bb55ff','#7744ff','#5599ff','#dd88ff','#aaccff'];
+  // Single ring matching the knockback wave speed
+  for(let i=0;i<28;i++){
+    const a=(i/28)*Math.PI*2;
+    const col=COLS[i%COLS.length];
+    const life=1.26+Math.random()*.54;
+    particles.push({x:pl.x,y:pl.y,vx:Math.cos(a)*420,vy:Math.sin(a)*420,
+      life,maxLife:life,r:3.5+Math.random()*4,col,glow:col});
+  }
+  // White core flash
+  for(let i=0;i<12;i++){
+    const a=Math.random()*Math.PI*2,spd=80+Math.random()*140;
+    const life=.25+Math.random()*.2;
+    particles.push({x:pl.x,y:pl.y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,
+      life,maxLife:life,r:2+Math.random()*3,col:'#ffffff',glow:'#cc88ff'});
+  }
+  // Omnidirectional burst (like deathBurst but mana-coloured)
+  const BCOLS=['#bb55ff','#7744ff','#5599ff','#dd88ff'];
+  for(let i=0;i<28;i++){
+    const a=Math.random()*Math.PI*2,spd=60+Math.random()*100;
+    const col=BCOLS[i%BCOLS.length],life=.35+Math.random()*.3;
+    particles.push({x:pl.x,y:pl.y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,
+      life,maxLife:life,r:3.5+Math.random()*5,col,glow:col});
+  }
+  for(let i=0;i<18;i++){
+    const a=Math.random()*Math.PI*2,spd=100+Math.random()*140;
+    const col=BCOLS[i%BCOLS.length],life=.15+Math.random()*.15;
+    particles.push({x:pl.x,y:pl.y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,
+      life,maxLife:life,r:1+Math.random()*2,col,glow:col});
+  }
+  auras.push({x:pl.x,y:pl.y,r:0,maxR:80,life:.35,maxLife:.35,rgb:'170,68,255'});
+  // Give player iframes for the wave duration
+  pl.iframes=Math.max(pl.iframes||0, 1.1);
+  // Instant knockback
+  for(const e of enemies){
+    if(e.dead)continue;
+    const dx=e.x-pl.x,dy=e.y-pl.y,dist=Math.hypot(dx,dy);
+    if(dist<150&&dist>0){
+      const force=1100*(1-dist/150)+300;
+      e.kbVx=(dx/dist)*force; e.kbVy=(dy/dist)*force; e.kbT=1.0; e.kbHit=true;
+    }
+  }
+}
+
+function _showLevelUpMenu(){
+  state='levelup';
+  const ls=document.getElementById('lvlScreen');
+  ls.classList.remove('chest-mode','hidden');
+  document.getElementById('lvlTitle').textContent='✦ THE SHEPHERD GROWS ✦';
   syncCardSelection();
 }
 
@@ -122,6 +190,7 @@ function genChoices(n){
 }
 
 function pickUpgrade(c){
+  playPickSound();
   if(c.isW){
     const ex=pl.weapons.find(w=>w.type===c.key);
     if(ex){
@@ -137,5 +206,6 @@ function pickUpgrade(c){
   }
   document.getElementById('lvlScreen').classList.add('hidden');
   state='playing';
+  playerFrozen=false;
   if(pendingLU>0)setTimeout(triggerLU,80);
 }

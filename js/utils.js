@@ -20,6 +20,13 @@ function fmt(s){
   return String(Math.floor(s/60)).padStart(2,'0')+':'+String(Math.floor(s%60)).padStart(2,'0');
 }
 
+function lerpColor(a,b,t){
+  const h=s=>[parseInt(s.slice(1,3),16),parseInt(s.slice(3,5),16),parseInt(s.slice(5,7),16)];
+  const [ar,ag,ab]=h(a),[br,bg,bb]=h(b);
+  const r=(ar+(br-ar)*t)|0,g=(ag+(bg-ag)*t)|0,bl=(ab+(bb-ab)*t)|0;
+  return'#'+(r*65536+g*256+bl).toString(16).padStart(6,'0');
+}
+
 function onScreen(x,y,pad=0){
   return x>cam.x-pad&&x<cam.x+W+pad&&y>cam.y-pad&&y<cam.y+H+pad;
 }

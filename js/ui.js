@@ -20,7 +20,9 @@ function updateHUD(){
   if(now-_lastHudT<100)return;
   _lastHudT=now;
 
-  _hpFill.style.width=(pl.hp/pl.maxHp*100)+'%';
+  const hpPct=pl.hp/pl.maxHp;
+  _hpFill.style.width=(hpPct*100)+'%';
+  _hpFill.classList.toggle('low', hpPct<=0.3);
   _hpNum.textContent=Math.ceil(pl.hp)+' / '+pl.maxHp;
   _timer.textContent=fmt(gameTime);
   _kcnt.textContent='✦ '+kills+' SOULS FREED';

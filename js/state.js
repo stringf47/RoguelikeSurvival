@@ -13,3 +13,4 @@ let pl={};
 let hordeT={};
 let chests=[],chestSpawnIdx=0;
 let corruptedZones=[];
+let bgWave=0;

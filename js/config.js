@@ -299,6 +299,15 @@ const ETYPES=[
   {name:'Egg Chucker',     r:10,hp:22, spd:19,dmg:14,xpV:2,xpC:1,col:'#ddaa55',wave:4},
 ];
 
+/* ── BACKGROUND THEMES (per wave) ── */
+const BG_THEMES=[
+  {a:'#2d1a4a',b:'#341f54',c:'#4a2a6e',d:'#7a3a9e',brd:'#6a2a8e'}, // wave 0: void purple
+  {a:'#0f1e38',b:'#142240',c:'#1a3a6a',d:'#2a5a9e',brd:'#1a4a8e'}, // wave 1: deep ocean
+  {a:'#0f2a14',b:'#143018',c:'#1a4a22',d:'#2a7a3a',brd:'#1a6a2a'}, // wave 2: corrupted forest
+  {a:'#380f0f',b:'#421212',c:'#6a1a1a',d:'#9e2a2a',brd:'#8e1a1a'}, // wave 3: blood field
+  {a:'#261200',b:'#301600',c:'#4a2600',d:'#7a4200',brd:'#6e3600'}, // wave 4: hellfire
+];
+
 /* ── XP CURVE ── */
 const XP_CURVE=(lv)=>Math.floor((10*Math.pow(1.22,lv-1)+lv*7)*1.6);
 
