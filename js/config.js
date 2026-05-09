@@ -300,7 +300,7 @@ const ETYPES=[
 ];
 
 /* ── XP CURVE ── */
-const XP_CURVE=(lv)=>Math.floor((10*Math.pow(1.18,lv-1)+lv*5)*0.8);
+const XP_CURVE=(lv)=>Math.floor((10*Math.pow(1.22,lv-1)+lv*7)*1.6);
 
 /* ── HORDE SPAWN TIMES (minutes) ── */
 const HORDE_TIMES=[2,4,6,8,12];
