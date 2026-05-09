@@ -294,11 +294,11 @@ canvas { display:block; touch-action:none; }
   <!-- Menu -->
   <div id="menuScreen" class="screen">
     <h1>BUTTERBALL'S</h1><h2>LAST STAND</h2>
-    <p>Move with WASD / Arrow Keys, or drag left side of screen</p>
+    <p id="menuControls">Move with WASD / Arrow Keys</p>
     <p>Weapons fire automatically</p>
     <p>Protect the flock for the next 10 minutes</p>
     <p>Survive until dawn to save the farm</p>
-    <button class="btn" onclick="startGame()">HOLD UNTIL DAWN</button>
+    <button class="btn" id="startBtn" onclick="startGame()">HOLD UNTIL DAWN</button>
   </div>
 
   <!-- Level Up -->
