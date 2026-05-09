@@ -89,7 +89,7 @@ function checkPlayerDeath(){
 }
 
 function initPlayer(){
-  pl={x:WORLD/2,y:WORLD/2,hp:210,maxHp:210,speed:230,level:1,xp:0,xpNext:10,
+  pl={x:WORLD/2,y:WORLD/2,hp:210,maxHp:210,speed:200,level:1,xp:0,xpNext:10,
       armor:0,regen:1,regenT:0,magnet:80,iframes:0,lastAngle:0,weapons:[],passives:{},infected:0,infectedT:0,
       rangeMult:1.0,dmgMult:1.0,atkSpeedMult:1.0,wAtkMult:{},wDmgMult:{},wLvDmgMult:1,wLvAtkMult:1,
       leanAng:0,leanVel:0,vx:0,vy:0,weakenedT:0,weakenMult:1,slowedT:0,bleedT:0};
