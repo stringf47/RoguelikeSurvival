@@ -573,9 +573,3 @@ function startGame(){
 lastTS=performance.now();
 requestAnimationFrame(loop);
 
-if(/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)){
-  const mc=document.getElementById('menuControls');
-  if(mc)mc.textContent='Tap left or right to set your joystick hand';
-  const sb=document.getElementById('startBtn');
-  if(sb){sb.style.fontSize='22px';sb.style.padding='18px 52px';sb.style.marginTop='30px';}
-}
