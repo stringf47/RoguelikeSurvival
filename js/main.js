@@ -22,7 +22,7 @@ function spawnSeal(){
   let x,y;
   for(let i=0;i<16;i++){
     x=200+Math.random()*(WORLD-400);
-    y=200+Math.random()*(WORLD-400);
+    y=200+Math.random()*(WORLDH-400);
     if(Math.hypot(x-pl.x,y-pl.y)>400)break;
   }
   const iter=Math.max(0,Math.floor((gameTime-60)/120));
@@ -36,7 +36,7 @@ function spawnCrimsonCross(){
   let x,y;
   for(let i=0;i<16;i++){
     x=200+Math.random()*(WORLD-400);
-    y=200+Math.random()*(WORLD-400);
+    y=200+Math.random()*(WORLDH-400);
     if(Math.hypot(x-pl.x,y-pl.y)>400)break;
   }
   const iter=Math.max(0,Math.floor((gameTime-180)/120));
@@ -60,7 +60,7 @@ function spawnChest(){
   let x,y;
   for(let i=0;i<16;i++){
     x=200+Math.random()*(WORLD-400);
-    y=200+Math.random()*(WORLD-400);
+    y=200+Math.random()*(WORLDH-400);
     if(Math.hypot(x-pl.x,y-pl.y)>1200)break;
   }
   chests.push({x,y,id:++eid,done:false,fill:0});
@@ -89,7 +89,7 @@ function checkPlayerDeath(){
 }
 
 function initPlayer(){
-  pl={x:WORLD/2,y:WORLD/2,hp:210,maxHp:210,speed:200,level:1,xp:0,xpNext:10,
+  pl={x:WORLD/2,y:WORLDH/2,hp:210,maxHp:210,speed:200,level:1,xp:0,xpNext:10,
       armor:0,regen:1,regenT:0,magnet:80,iframes:0,lastAngle:0,weapons:[],passives:{},infected:0,infectedT:0,
       rangeMult:1.0,dmgMult:1.0,atkSpeedMult:1.0,wAtkMult:{},wDmgMult:{},wLvDmgMult:1,wLvAtkMult:1,
       leanAng:0,leanVel:0,vx:0,vy:0,weakenedT:0,weakenMult:1,slowedT:0,bleedT:0};
@@ -193,7 +193,7 @@ function update(dt){
       }
     }
   }
-  seals=seals.filter(s=>!s.dead&&s.timeLeft>0);
+  for(let _i=seals.length-1;_i>=0;_i--){if(seals[_i].dead||seals[_i].timeLeft<=0){seals[_i]=seals[seals.length-1];seals.pop();}}
 
   // Seal contact damage
   for(const s of seals){
@@ -221,7 +221,7 @@ function update(dt){
       c.fill=Math.max(0,c.fill-CHEST_DRAIN_RATE*dt);
     }
   }
-  chests=chests.filter(c=>!c.done);
+  for(let _i=chests.length-1;_i>=0;_i--)if(chests[_i].done){chests[_i]=chests[chests.length-1];chests.pop();}
 
   if(pl.regen){pl.regenT+=dt;if(pl.regenT>=1){pl.regenT-=1;pl.hp=Math.min(pl.maxHp,pl.hp+pl.regen);}}
   if(pl.infected>0){
@@ -238,7 +238,7 @@ function update(dt){
   const{dx,dy}=getDir();
   const slowMult=(pl.slowedT||0)>0?0.8:1;
   if(!playerFrozen){
-    const tvx=dx*pl.speed*slowMult*1.2,tvy=dy*pl.speed*slowMult*0.78;
+    const tvx=dx*pl.speed*slowMult*1.2,tvy=dy*pl.speed*slowMult*0.9;
     const rateX=(pl.vx||0)*tvx>=0?18:1.8;
     const rateY=(pl.vy||0)*tvy>=0?18:3.5;
     pl.vx=(pl.vx||0)+(tvx-(pl.vx||0))*rateX*dt;
@@ -249,7 +249,7 @@ function update(dt){
   pl.leanVel+=(targetLean-pl.leanAng)*220*dt-pl.leanVel*20*dt;
   pl.leanAng+=pl.leanVel*dt;
   pl.x=Math.max(20,Math.min(WORLD-20,pl.x));
-  pl.y=Math.max(20,Math.min(WORLD-20,pl.y));
+  pl.y=Math.max(20,Math.min(WORLDH-20,pl.y));
   if(pl.iframes>0)pl.iframes-=dt;
 
   cam.x=pl.x-W/2;cam.y=pl.y-H/2;
@@ -270,8 +270,7 @@ function update(dt){
     pl.zoneDropT=(pl.zoneDropT||0)+dt;
     if((dx||dy)&&pl.zoneDropT>=0.35){pl.zoneDropT=0;corruptedZones.push({x:pl.x,y:pl.y,r:55,life:3.5,maxLife:3.5});}
   }
-  for(const z of corruptedZones)z.life-=dt;
-  corruptedZones=corruptedZones.filter(z=>z.life>0);
+  for(let _i=corruptedZones.length-1;_i>=0;_i--){corruptedZones[_i].life-=dt;if(corruptedZones[_i].life<=0){corruptedZones[_i]=corruptedZones[corruptedZones.length-1];corruptedZones.pop();}}
 
   spawnT+=dt;
   const spawnRate=Math.max(1.0,2.8-gameTime/200);
@@ -316,7 +315,7 @@ function update(dt){
       if(e.poisonT>=0.5){e.poisonT-=0.5;hitEnemy(e,e.poison*5);}
     }
 
-    const sm=(pl.unholyGround&&corruptedZones.some(z=>Math.hypot(e.x-z.x,e.y-z.y)<z.r))?.6:1;
+    let sm=1;if(pl.unholyGround){for(const z of corruptedZones){const _dx=e.x-z.x,_dy=e.y-z.y;if(_dx*_dx+_dy*_dy<z.r*z.r){sm=.6;break;}}}
 
     if(e.name==='Ram Rusher'){
       if(e.chargeState==='charging'){
@@ -341,7 +340,7 @@ function update(dt){
         if(e.teleportT<=0){
           const ta=Math.random()*Math.PI*2,td=90+Math.random()*110;
           e.x=Math.max(60,Math.min(WORLD-60,pl.x+Math.cos(ta)*td));
-          e.y=Math.max(60,Math.min(WORLD-60,pl.y+Math.sin(ta)*td));
+          e.y=Math.max(60,Math.min(WORLDH-60,pl.y+Math.sin(ta)*td));
           e.zoneX=e.x;e.zoneY=e.y;e.appearT=0.5;
           e.zonePhase='telegraph';e.zoneT=1.8;
           burst(e.x,e.y,'#c8c4a0',14);
@@ -411,7 +410,7 @@ function update(dt){
       }
     }
   }
-  toxicClouds=toxicClouds.filter(tc=>tc.life>0);
+  for(let _i=toxicClouds.length-1;_i>=0;_i--)if(toxicClouds[_i].life<=0){toxicClouds[_i]=toxicClouds[toxicClouds.length-1];toxicClouds.pop();}
 
   for(const p of projs){
     p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;
@@ -454,7 +453,7 @@ function update(dt){
 
   for(const sp of sealProjs){
     sp.x+=sp.vx*dt;sp.y+=sp.vy*dt;sp.life-=dt;
-    if(particles.length<MAX_PARTICLES&&Math.random()<0.65)
+    if(particles.length<MAX_PARTICLES&&Math.random()<0.5)
       particles.push({x:sp.x+(Math.random()-.5)*sp.r,y:sp.y+(Math.random()-.5)*sp.r,
         vx:(Math.random()-.5)*25,vy:(Math.random()-.5)*25,
         life:.12+Math.random()*.1,maxLife:.22,r:1.5+Math.random()*3,col:'#9933cc'});
@@ -485,26 +484,22 @@ function update(dt){
 
   if(vacuumT>0)vacuumT-=dt;
 
-  for(const g of xpGems){
-    const gx=pl.x-g.x,gy=pl.y-g.y,gd=Math.hypot(gx,gy);
+  for(let _i=xpGems.length-1;_i>=0;_i--){
+    const g=xpGems[_i];
+    const gx=pl.x-g.x,gy=pl.y-g.y,gd2=gx*gx+gy*gy;
+    const gd=Math.sqrt(gd2);
     if(vacuumT>0||gd<pl.magnet){const pull=vacuumT>0?1200:Math.min(350,350*(1-gd/pl.magnet)+80);g.x+=(gx/gd)*pull*dt;g.y+=(gy/gd)*pull*dt;}
-    if(gd<18){addXP(g.v);g.done=true;}
+    if(gd<18){addXP(g.v);xpGems[_i]=xpGems[xpGems.length-1];xpGems.pop();}
   }
-  xpGems=xpGems.filter(g=>!g.done);
 
-  for(const h of hpDrops){
-    if(Math.hypot(pl.x-h.x,pl.y-h.y)<26){pl.hp=Math.min(pl.maxHp,pl.hp+35);h.done=true;playHeartSound();burst(pl.x,pl.y,'#ff4466',8);}
+  for(let _i=hpDrops.length-1;_i>=0;_i--){
+    const h=hpDrops[_i];
+    if((pl.x-h.x)*(pl.x-h.x)+(pl.y-h.y)*(pl.y-h.y)<676){pl.hp=Math.min(pl.maxHp,pl.hp+35);playHeartSound();burst(pl.x,pl.y,'#ff4466',8);hpDrops[_i]=hpDrops[hpDrops.length-1];hpDrops.pop();}
   }
-  hpDrops=hpDrops.filter(h=>!h.done);
-
-  for(const m of magnetDrops){
-    if(Math.hypot(pl.x-m.x,pl.y-m.y)<26){
-      m.done=true;vacuumT=3.5;
-      playMagnetSound();
-      burst(pl.x,pl.y,'#44ccff',14);burst(pl.x,pl.y,'#aa66ff',10);
-    }
+  for(let _i=magnetDrops.length-1;_i>=0;_i--){
+    const m=magnetDrops[_i];
+    if((pl.x-m.x)*(pl.x-m.x)+(pl.y-m.y)*(pl.y-m.y)<676){vacuumT=3.5;playMagnetSound();burst(pl.x,pl.y,'#44ccff',14);burst(pl.x,pl.y,'#aa66ff',10);magnetDrops[_i]=magnetDrops[magnetDrops.length-1];magnetDrops.pop();}
   }
-  magnetDrops=magnetDrops.filter(m=>!m.done);
 
   updateHUD();
 }

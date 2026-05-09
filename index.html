@@ -55,13 +55,23 @@ canvas { display:block; touch-action:none; }
 #mobilePause:hover { background:rgba(34,0,0,.85); border-color:#cc1111; color:#ff4444; }
 @media (hover:none) { #mobilePause { display:block; } }
 #muteBtn {
-  position:absolute; bottom:62px; left:12px;
+  position:absolute; bottom:152px; right:12px;
   background:rgba(0,0,0,.65); border:1px solid #440000; color:#cc1111;
   font-size:15px; padding:4px 8px; pointer-events:auto; cursor:pointer; z-index:11;
+  min-width:37px; text-align:center;
   transition:background .2s, border-color .2s, transform .1s;
 }
 #muteBtn:hover { background:rgba(34,0,0,.85); border-color:#cc1111; }
 #muteBtn:active { transform:scale(.92); }
+#pauseBtn {
+  position:absolute; bottom:120px; right:12px;
+  background:rgba(0,0,0,.65); border:1px solid #440000; color:#cc1111;
+  font-size:15px; padding:4px 8px; pointer-events:auto; cursor:pointer; z-index:11;
+  min-width:37px; text-align:center;
+  transition:background .2s, border-color .2s, transform .1s;
+}
+#pauseBtn:hover { background:rgba(34,0,0,.85); border-color:#cc1111; }
+#pauseBtn:active { transform:scale(.92); }
 
 /* ── SCREENS ── */
 .screen {
@@ -98,7 +108,7 @@ canvas { display:block; touch-action:none; }
 .cards .card:nth-child(3) { animation-delay:.22s; }
 .cards .card:nth-child(4) { animation-delay:.31s; }
 .card:hover { border-color:#cc1111; background:#110000; box-shadow:0 0 22px #cc111144; transform:translateY(-5px); }
-.card.selected { border-color:#ff3333; background:#1a0000; box-shadow:0 0 32px #cc111188; transform:translateY(-5px); outline:2px solid #ff333355; }
+@media (hover:hover) { .card.selected { border-color:#ff3333; background:#1a0000; box-shadow:0 0 32px #cc111188; transform:translateY(-5px); outline:2px solid #ff333355; } }
 .card .ci { font-size:38px; margin-bottom:8px; }
 .card .badge {
   display:inline-block; background:#1a0000; color:#cc1111;
@@ -111,7 +121,7 @@ canvas { display:block; touch-action:none; }
 #lvlScreen.chest-mode h1 { color:#cc8833; text-shadow:0 0 20px #cc8833,0 0 50px #885500; }
 #lvlScreen.chest-mode .card { border-color:#6a4a00; background:#0a0600; }
 #lvlScreen.chest-mode .card:hover { border-color:#cc8833; background:#150d00; box-shadow:0 0 22px #cc883344; }
-#lvlScreen.chest-mode .card.selected { border-color:#ffaa33; background:#1a0f00; box-shadow:0 0 32px #cc883388; outline:2px solid #cc883355; }
+@media (hover:hover) { #lvlScreen.chest-mode .card.selected { border-color:#ffaa33; background:#1a0f00; box-shadow:0 0 32px #cc883388; outline:2px solid #cc883355; } }
 #lvlScreen.chest-mode .card .badge { background:#1a0f00; color:#cc8833; }
 #lvlScreen.chest-mode .card .cn { color:#cc8833; }
 
@@ -139,7 +149,7 @@ canvas { display:block; touch-action:none; }
 #xpcnt  { color:#f0c040; font-size:12px; letter-spacing:2px; }
 #dpscnt { color:#ff5522; font-size:12px; letter-spacing:2px; }
 #wbar   {
-  position:absolute; bottom:14px; left:12px; display:flex; gap:6px;
+  position:absolute; top:50px; left:12px; display:flex; flex-direction:column; gap:4px;
   animation: hudIn .5s ease .2s both;
 }
 .wslot  {
@@ -154,13 +164,13 @@ canvas { display:block; touch-action:none; }
 
 /* ── LEGENDARY BAR ── */
 #legendaryBar {
-  position:absolute; top:52px; left:12px; display:flex; gap:5px;
+  position:absolute; top:50px; left:58px; display:flex; flex-direction:column; gap:4px;
   animation: hudIn .5s ease .25s both;
 }
 .legSlot {
-  width:26px; height:26px; background:#0a0000; border:1px solid #6a2a00;
-  border-radius:3px; display:flex; align-items:center; justify-content:center;
-  font-size:14px; position:relative; pointer-events:auto; cursor:default;
+  width:40px; height:40px; background:#0a0000; border:1px solid #6a2a00;
+  border-radius:4px; display:flex; align-items:center; justify-content:center;
+  font-size:19px; position:relative; pointer-events:auto; cursor:default;
   transition:border-color .2s, box-shadow .2s;
 }
 .legSlot:hover { border-color:#cc8833; box-shadow:0 0 8px #cc883344; }
@@ -240,6 +250,7 @@ canvas { display:block; touch-action:none; }
 
   <button id="mobilePause" onclick="togglePause()">❙❙ PAUSE</button>
   <button id="muteBtn" onclick="toggleMute()">🔊</button>
+  <button id="pauseBtn" onclick="togglePause()">⏸</button>
 
   <div id="hudTooltip"></div>
   <div id="sealBanner">
@@ -256,7 +267,6 @@ canvas { display:block; touch-action:none; }
       <div id="hpLbl">♥ HEALTH<span id="hpNum">200 / 200</span></div>
       <div id="hpTrack"><div id="hpFill" style="width:100%"></div></div>
     </div>
-    <div id="legendaryBar"></div>
     <div id="stats">
       <div id="timer">00:00</div>
       <div id="lvldsp">✦ LVL 1</div>
@@ -268,6 +278,7 @@ canvas { display:block; touch-action:none; }
       <div id="sealMessage"></div>
     </div>
     <div id="wbar"></div>
+    <div id="legendaryBar"></div>
     <div id="xpBar"><div id="xpFill" style="width:0%"></div></div>
   </div>
 

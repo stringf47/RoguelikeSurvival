@@ -1,5 +1,5 @@
 /* ── CONSTANTS ── */
-const W=800,H=600,WORLD=4000,WIN_TIME=10*60;
+const W=800,H=600,WORLD=4000,WORLDH=3000,WIN_TIME=10*60;
 
 function hitTarget(t,dmg){t.isSeal?hitSeal(t,dmg):hitEnemy(t,dmg);}
 

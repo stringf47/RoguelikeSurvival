@@ -29,7 +29,7 @@ function spawnEnemy(){
   for(let i=0;i<eligible.length;i++){r-=weights[i];if(r<=0){type=eligible[i];break;}}
   const ang=Math.random()*Math.PI*2,dist=460+Math.random()*100;
   const x=Math.max(50,Math.min(WORLD-50,pl.x+Math.cos(ang)*dist));
-  const y=Math.max(50,Math.min(WORLD-50,pl.y+Math.sin(ang)*dist));
+  const y=Math.max(50,Math.min(WORLDH-50,pl.y+Math.sin(ang)*dist));
   spawnEnemyAt(type,x,y);
 
   if(type.name==='Cursed Crow'){
@@ -38,7 +38,7 @@ function spawnEnemy(){
       const oa=Math.random()*Math.PI*2,od=12+Math.random()*28;
       spawnEnemyAt(type,
         Math.max(50,Math.min(WORLD-50,x+Math.cos(oa)*od)),
-        Math.max(50,Math.min(WORLD-50,y+Math.sin(oa)*od))
+        Math.max(50,Math.min(WORLDH-50,y+Math.sin(oa)*od))
       );
     }
   }
@@ -49,7 +49,7 @@ function spawnEnemy(){
       const oa=Math.random()*Math.PI*2,od=8+Math.random()*22;
       spawnEnemyAt(type,
         Math.max(50,Math.min(WORLD-50,x+Math.cos(oa)*od)),
-        Math.max(50,Math.min(WORLD-50,y+Math.sin(oa)*od))
+        Math.max(50,Math.min(WORLDH-50,y+Math.sin(oa)*od))
       );
     }
   }
@@ -60,7 +60,7 @@ function spawnEnemy(){
       const oa=Math.random()*Math.PI*2,od=18+Math.random()*38;
       spawnEnemyAt(type,
         Math.max(50,Math.min(WORLD-50,x+Math.cos(oa)*od)),
-        Math.max(50,Math.min(WORLD-50,y+Math.sin(oa)*od))
+        Math.max(50,Math.min(WORLDH-50,y+Math.sin(oa)*od))
       );
     }
   }

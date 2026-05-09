@@ -47,9 +47,10 @@ function openChest(){
   for(const c of currentChoices){
     const curLv=c.isW?(pl.weapons.find(w=>w.type===c.key)?.level||0):(pl.passives[c.key]||0);
     const nLv=curLv+1;const isNew=c.isW&&curLv===0;
+    const badgeLabel=c.isLegendary?'LEGENDARY':(isNew?'NEW':'LVL '+nLv);
     const el=document.createElement('div');el.className='card';
     el.innerHTML=`<div class="ci">${c.icon}</div>
-      <div class="badge">${isNew?'NEW':'LVL '+nLv}</div>
+      <div class="badge">${badgeLabel}</div>
       <div class="cn">${c.name}</div>
       <div class="cd">${c.desc}</div>`;
     el.onclick=()=>pickUpgrade(c);
@@ -84,8 +85,9 @@ function triggerLU(){
     const curLv=c.isW?(pl.weapons.find(w=>w.type===c.key)?.level||0):(pl.passives[c.key]||0);
     const nLv=curLv+1;
     const isNew=c.isW&&curLv===0;
+    const badgeLabel=c.isLegendary?'LEGENDARY':(isNew?'NEW':'LVL '+nLv);
     const el=document.createElement('div');el.className='card';
-    el.innerHTML=`<div class="ci">${c.icon}</div><div class="badge">${isNew?'NEW':'LVL '+nLv}</div><div class="cn">${c.name}</div><div class="cd">${c.desc}</div>`;
+    el.innerHTML=`<div class="ci">${c.icon}</div><div class="badge">${badgeLabel}</div><div class="cn">${c.name}</div><div class="cd">${c.desc}</div>`;
     el.onclick=()=>pickUpgrade(c);
     cc.appendChild(el);
   }

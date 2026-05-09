@@ -1,4 +1,8 @@
+const _xpBuckets=new Uint16Array(24); // 6x4 grid
+
+let _now=0;
 function render(){
+  _now=_now;
   ctx.clearRect(0,0,W,H);
   ctx.save();
   ctx.translate(shake.x-cam.x,shake.y-cam.y);
@@ -18,7 +22,7 @@ function render(){
   for(const m of magnetDrops){
     if(!onScreen(m.x,m.y,20))continue;
     ctx.save();ctx.translate(m.x,m.y);
-    const pulse=.7+Math.sin(Date.now()*.007)*.3;
+    const pulse=.7+Math.sin(_now*.007)*.3;
     ctx.shadowColor='#44ccff';ctx.shadowBlur=18*pulse;
     ctx.strokeStyle=`rgba(100,210,255,${pulse})`;ctx.lineWidth=2;
     ctx.beginPath();ctx.arc(0,1,7,Math.PI*.1,Math.PI*.9,true);ctx.stroke();
@@ -34,7 +38,7 @@ function render(){
   for(const h of hpDrops){
     if(!onScreen(h.x,h.y,20))continue;
     ctx.save();ctx.translate(h.x,h.y);
-    const hp=.6+Math.sin(Date.now()*.005)*.4;
+    const hp=.6+Math.sin(_now*.005)*.4;
     ctx.beginPath();ctx.arc(0,0,14+hp*4,0,Math.PI*2);
     ctx.strokeStyle=`rgba(255,60,60,${hp*.5})`;ctx.lineWidth=1.5;ctx.stroke();
     ctx.font='18px serif';ctx.textAlign='center';ctx.textBaseline='middle';
@@ -114,8 +118,10 @@ function render(){
   }
 
   // Enemies
-  for(const e of enemies){if(e.name==='Plague Rat'&&onScreen(e.x,e.y,e.r+40))drawEnemy(e);}
-  for(const e of enemies){if(e.name!=='Plague Rat'&&onScreen(e.x,e.y,e.r+40))drawEnemy(e);}
+  const _rats=[],_others=[];
+  for(const e of enemies){if(!onScreen(e.x,e.y,e.r+40))continue;if(e.name==='Plague Rat')_rats.push(e);else _others.push(e);}
+  for(const e of _rats)drawEnemy(e);
+  for(const e of _others)drawEnemy(e);
 
   // Bible orbs
   for(const w of pl.weapons){
@@ -159,7 +165,7 @@ function render(){
   for(const w of pl.weapons){
     if(w.type!=='garlic')continue;
     const s=WDEFS.garlic.stats(w.level);
-    const breathe=.5+Math.sin(Date.now()*.0028)*.5;
+    const breathe=.5+Math.sin(_now*.0028)*.5;
     ctx.save();
     ctx.beginPath();ctx.arc(pl.x,pl.y,s.r,0,Math.PI*2);
     ctx.fillStyle=`rgba(80,200,50,${.04+breathe*.03})`;ctx.fill();
@@ -278,7 +284,7 @@ function drawBG(){
     }
   }
   ctx.strokeStyle=cbrd;ctx.lineWidth=5;
-  ctx.strokeRect(0,0,WORLD,WORLD);
+  ctx.strokeRect(0,0,WORLD,WORLDH);
   ctx.shadowBlur=0;
 }
 
@@ -286,7 +292,7 @@ function drawEnemy(e){
   ctx.save();
   ctx.translate(e.x+(e.shakeX||0),e.y+(e.shakeY||0));
   if(e.sealBuffed){
-    const bp=.4+Math.sin(Date.now()*.004)*.3;
+    const bp=.4+Math.sin(_now*.004)*.3;
     ctx.shadowColor='#aa44ff';ctx.shadowBlur=10+bp*8;
     ctx.beginPath();ctx.arc(0,0,e.r+4,0,Math.PI*2);
     ctx.strokeStyle=`rgba(170,68,255,${.25+bp*.25})`;ctx.lineWidth=2;ctx.stroke();
@@ -368,7 +374,7 @@ function drawEnemy(e){
       for(let i=0;i<segs;i++){
         const t0=i/segs,t1=(i+1)/segs;
         ctx.strokeStyle=`rgba(220,30,30,${(1-t0)*0.75})`;
-        ctx.setLineDash([8,6]);ctx.lineDashOffset=-(Date.now()*0.08%14);
+        ctx.setLineDash([8,6]);ctx.lineDashOffset=-(_now*0.08%14);
         ctx.beginPath();
         ctx.moveTo(e.chargeDx*len*t0,e.chargeDy*len*t0);
         ctx.lineTo(e.chargeDx*len*t1,e.chargeDy*len*t1);
@@ -447,7 +453,7 @@ function drawEnemy(e){
     // Body glow signals telegraph / active phase
     if(zp==='telegraph'){
       const prog=1-zt/1.8;
-      const pulse=0.5+Math.sin(Date.now()*.018)*0.5;
+      const pulse=0.5+Math.sin(_now*.018)*0.5;
       ctx.beginPath();ctx.ellipse(0,-e.r*1.1,e.r*2.4,e.r*2.9,0,0,Math.PI*2);
       ctx.strokeStyle=`rgba(255,${Math.floor(120*(1-prog))},0,${0.18+prog*0.62+pulse*0.1})`;
       ctx.lineWidth=3+prog*4;
@@ -528,7 +534,7 @@ function drawPlayer(){
   ctx.fillStyle='rgba(0,0,0,.4)';ctx.fill();
 
   if(pl.infected>0){
-    const pulse=.4+Math.sin(Date.now()*.008)*(.2+pl.infected*.06);
+    const pulse=.4+Math.sin(_now*.008)*(.2+pl.infected*.06);
     ctx.beginPath();ctx.ellipse(0,0,16+pl.infected,13+pl.infected*.5,0,0,Math.PI*2);
     ctx.strokeStyle=`rgba(85,220,34,${pulse})`;ctx.lineWidth=2;
     ctx.shadowColor='#44ff22';ctx.shadowBlur=10+pl.infected*3;
@@ -575,26 +581,43 @@ function drawPlayer(){
 }
 
 function drawMinimap(){
-  const mx=W-84,my=H-84,ms=72,sc=ms/WORLD;
+  const msW=128,msH=96,mx=W-msW-12,my=H-msH-12;
+  const scX=msW/WORLD,scY=msH/WORLDH;
   ctx.fillStyle='rgba(0,0,0,.55)';ctx.strokeStyle='#330000';ctx.lineWidth=1;
-  ctx.fillRect(mx,my,ms,ms);ctx.strokeRect(mx,my,ms,ms);
-  ctx.fillStyle='#cc3333';
-  for(const e of enemies){ctx.fillRect(mx+e.x*sc-1,my+e.y*sc-1,2,2);}
-  ctx.fillStyle='#ffcc44';
-  for(const c of chests){ctx.beginPath();ctx.arc(mx+c.x*sc,my+c.y*sc,3,0,Math.PI*2);ctx.fill();}
+  ctx.fillRect(mx,my,msW,msH);ctx.strokeRect(mx,my,msW,msH);
+  ctx.fillStyle='#881111';
+  for(const e of enemies){ctx.fillRect(mx+e.x*scX-1,my+e.y*scY-1,2,2);}
+  ctx.fillStyle='#ffdd44';
+  for(const c of chests){ctx.beginPath();ctx.arc(mx+c.x*scX,my+c.y*scY,3,0,Math.PI*2);ctx.fill();}
   for(const s of seals){
     ctx.fillStyle=s.type==='cc'?'#ff3322':'#aa44ff';
-    ctx.beginPath();ctx.arc(mx+s.x*sc,my+s.y*sc,3,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(mx+s.x*scX,my+s.y*scY,3,0,Math.PI*2);ctx.fill();
   }
-  ctx.fillStyle='#cc2222';
-  ctx.beginPath();ctx.arc(mx+pl.x*sc,my+pl.y*sc,3,0,Math.PI*2);ctx.fill();
+  _xpBuckets.fill(0);
+  for(const g of xpGems){
+    const bx=Math.min(5,(g.x/WORLD*6)|0),by=Math.min(3,(g.y/WORLDH*4)|0);
+    _xpBuckets[by*6+bx]++;
+  }
+  ctx.fillStyle='#555555';
+  for(let i=0;i<24;i++){
+    if(_xpBuckets[i]<20)continue;
+    const cx=mx+((i%6)+0.5)/6*msW,cy=my+((i/6|0)+0.5)/4*msH;
+    ctx.beginPath();ctx.arc(cx,cy,Math.min(4,1+_xpBuckets[i]*0.3),0,Math.PI*2);ctx.fill();
+  }
+  const _flash=Math.floor(_now/300)%2===0;
+  ctx.fillStyle=_flash?'#ff3344':'#ffffff';
+  for(const h of hpDrops){ctx.beginPath();ctx.arc(mx+h.x*scX,my+h.y*scY,2.5,0,Math.PI*2);ctx.fill();}
+  ctx.fillStyle=_flash?'#44aaff':'#ffffff';
+  for(const m of magnetDrops){ctx.beginPath();ctx.arc(mx+m.x*scX,my+m.y*scY,2.5,0,Math.PI*2);ctx.fill();}
+  ctx.fillStyle='#ffffff';
+  ctx.beginPath();ctx.arc(mx+pl.x*scX,my+pl.y*scY,3,0,Math.PI*2);ctx.fill();
   ctx.strokeStyle='rgba(204,34,34,.4)';ctx.lineWidth=1;
-  ctx.strokeRect(mx+cam.x*sc,my+cam.y*sc,W*sc,H*sc);
+  ctx.strokeRect(mx+cam.x*scX,my+cam.y*scY,W*scX,H*scY);
 }
 
 function drawChest(c){
   const x=c.x,y=c.y,fill=c.fill||0;
-  const bob=Math.sin(Date.now()*.003)*3;
+  const bob=Math.sin(_now*.003)*3;
 
   // Fill ring (no bob — stays anchored to world position)
   ctx.save();ctx.translate(x,y);
@@ -634,7 +657,7 @@ function drawChest(c){
   ctx.fillStyle='#c97d2e';
   ctx.beginPath();ctx.arc(0,-1,2.5,0,Math.PI*2);ctx.fill();
 
-  const pulse=.5+Math.sin(Date.now()*.005)*.5;
+  const pulse=.5+Math.sin(_now*.005)*.5;
   ctx.globalAlpha=pulse*.4;
   ctx.beginPath();ctx.arc(0,4,22,0,Math.PI*2);
   ctx.fillStyle='#ffcc44';ctx.fill();
@@ -645,7 +668,7 @@ function drawChest(c){
 
 function drawCrimsonCross(s){
   const x=s.x,y=s.y;
-  const t=Date.now()*.001;
+  const t=_now*.001;
   const bob=Math.sin(t*2.0)*4;
   const pulse=.5+Math.sin(t*4)*.5;
   const flashing=s.flash>0;
@@ -699,7 +722,7 @@ function drawCrimsonCross(s){
 function drawSeal(s){
   if(s.type==='cc'){drawCrimsonCross(s);return;}
   const x=s.x,y=s.y;
-  const t=Date.now()*.001;
+  const t=_now*.001;
   const bob=Math.sin(t*2.2)*4;
   const pulse=.5+Math.sin(t*3)*.5;
   const R=14;
@@ -784,7 +807,7 @@ function drawSealArrow(seal){
   const dist=Math.floor(Math.hypot(seal.x-pl.x,seal.y-pl.y));
   const isCc=seal.type==='cc';
 
-  const cx=W/2,cy=H/2,pad=32;
+  const cx=W/2,cy=H/2,pad=160;
   const hw=cx-pad,hh=cy-pad;
   const cos=Math.cos(angle),sin=Math.sin(angle);
   const sX=cos!==0?hw/Math.abs(cos):Infinity;
@@ -792,7 +815,7 @@ function drawSealArrow(seal){
   const s2=Math.min(sX,sY);
   const ax=cx+cos*s2,ay=cy+sin*s2;
 
-  const pulse=.75+Math.sin(Date.now()*.007)*.25;
+  const pulse=.75+Math.sin(_now*.007)*.25;
 
   ctx.save();ctx.translate(ax,ay);
   ctx.rotate(angle);
@@ -813,7 +836,7 @@ function drawChestArrow(chest){
   const dist=Math.floor(Math.hypot(chest.x-pl.x,chest.y-pl.y));
 
   // Find screen-edge position along the angle
-  const cx=W/2,cy=H/2,pad=32;
+  const cx=W/2,cy=H/2,pad=160;
   const hw=cx-pad,hh=cy-pad;
   const cos=Math.cos(angle),sin=Math.sin(angle);
   const sX=cos!==0?hw/Math.abs(cos):Infinity;
@@ -821,7 +844,7 @@ function drawChestArrow(chest){
   const s=Math.min(sX,sY);
   const ax=cx+cos*s,ay=cy+sin*s;
 
-  const pulse=.75+Math.sin(Date.now()*.006)*.25;
+  const pulse=.75+Math.sin(_now*.006)*.25;
 
   ctx.save();ctx.translate(ax,ay);
 

@@ -1,53 +1,56 @@
 const keys={};
 const JRADIUS=65;
-const JBASE={x:110,y:490};
-const joystick={active:false,id:-1,knobX:110,knobY:490,dx:0,dy:0};
+const JBASE={x:135,y:465};
+const joystick={active:false,id:-1,knobX:135,knobY:465,dx:0,dy:0};
 let touchDevice=false;
 
-function toCanvas(t){
+function toCanvas(clientX,clientY){
   const r=canvas.getBoundingClientRect();
-  return{x:(t.clientX-r.left)*(800/r.width),y:(t.clientY-r.top)*(600/r.height)};
+  return{x:(clientX-r.left)*(800/r.width),y:(clientY-r.top)*(600/r.height)};
 }
 
-canvas.addEventListener('touchstart',e=>{
+function resetJoystick(){
+  joystick.active=false;joystick.id=-1;
+  joystick.knobX=JBASE.x;joystick.knobY=JBASE.y;
+  joystick.dx=0;joystick.dy=0;
+}
+
+canvas.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='mouse')return;
   e.preventDefault();
   touchDevice=true;
-  for(const t of e.changedTouches){
-    if(!joystick.active){
-      joystick.active=true;joystick.id=t.identifier;
-      joystick.knobX=JBASE.x;joystick.knobY=JBASE.y;
-      joystick.dx=0;joystick.dy=0;
-    }
+  if(!joystick.active){
+    joystick.active=true;joystick.id=e.pointerId;
+    joystick.knobX=JBASE.x;joystick.knobY=JBASE.y;
+    joystick.dx=0;joystick.dy=0;
+    canvas.setPointerCapture(e.pointerId);
   }
 },{passive:false});
 
-document.addEventListener('touchmove',e=>{
-  if(!joystick.active)return;
+canvas.addEventListener('pointermove',e=>{
+  if(e.pointerId!==joystick.id)return;
   e.preventDefault();
-  for(const t of e.changedTouches){
-    if(t.identifier===joystick.id){
-      const p=toCanvas(t);
-      const ddx=p.x-JBASE.x,ddy=p.y-JBASE.y;
-      const dist=Math.hypot(ddx,ddy);
-      const ang=Math.atan2(ddy,ddx);
-      const clamped=Math.min(dist,JRADIUS);
-      joystick.knobX=JBASE.x+Math.cos(ang)*clamped;
-      joystick.knobY=JBASE.y+Math.sin(ang)*clamped;
-      joystick.dx=dist>10?Math.cos(ang):0;
-      joystick.dy=dist>10?Math.sin(ang):0;
-    }
-  }
+  const p=toCanvas(e.clientX,e.clientY);
+  const ddx=p.x-JBASE.x,ddy=p.y-JBASE.y;
+  const dist=Math.hypot(ddx,ddy);
+  const ang=Math.atan2(ddy,ddx);
+  const clamped=Math.min(dist,JRADIUS);
+  joystick.knobX=JBASE.x+Math.cos(ang)*clamped;
+  joystick.knobY=JBASE.y+Math.sin(ang)*clamped;
+  joystick.dx=dist>10?Math.cos(ang):0;
+  joystick.dy=dist>10?Math.sin(ang):0;
 },{passive:false});
 
-document.addEventListener('touchend',e=>{
-  for(const t of e.changedTouches){
-    if(t.identifier===joystick.id){
-      joystick.active=false;
-      joystick.knobX=JBASE.x;joystick.knobY=JBASE.y;
-      joystick.dx=0;joystick.dy=0;
-    }
-  }
-},{passive:false});
+canvas.addEventListener('pointerup',e=>{
+  if(e.pointerId===joystick.id)resetJoystick();
+});
+canvas.addEventListener('pointercancel',e=>{
+  if(e.pointerId===joystick.id)resetJoystick();
+});
+
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden)resetJoystick();
+});
 
 window.addEventListener('keydown',e=>{
   if(state==='levelup'){
@@ -72,7 +75,7 @@ window.addEventListener('keydown',e=>{
 });
 
 window.addEventListener('keyup',e=>{keys[e.key]=false;});
-window.addEventListener('blur',()=>{for(const k in keys)keys[k]=false;});
+window.addEventListener('blur',()=>{for(const k in keys)keys[k]=false;resetJoystick();});
 
 function getDir(){
   let dx=0,dy=0;
