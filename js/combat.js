@@ -41,7 +41,7 @@ function killEnemy(e){
     }
   }
   if(e.name==='Corrupt Pig'&&!e.ghost){
-    const cnt=1+Math.floor(Math.random()*2);
+    const cnt=1;
     for(let i=0;i<cnt;i++){
       const ga=Math.random()*Math.PI*2;
       enemies.push({id:++eid,x:e.x+Math.cos(ga)*14,y:e.y+Math.sin(ga)*14,
@@ -50,6 +50,25 @@ function killEnemy(e){
         dying:false,dyingT:0,shakeX:0,shakeY:0,ghost:true});
     }
   }
+}
+
+function hitSeal(s,dmg){
+  const actual=Math.max(1,dmg*(pl.dmgMult||1)*(pl.wLvDmgMult||1)*0.8);
+  s.hp-=actual;
+  s.flash=.18;
+  totalDmg+=Math.floor(actual);
+  dmgLog.push({t:gameTime,v:actual});
+  dmgNums.push({x:s.x+(Math.random()-.5)*30,y:s.y-35,val:Math.floor(actual),life:.7,vy:-60});
+  if(s.hp<=0)killSeal(s);
+}
+
+function killSeal(s){
+  s.dead=true;
+  burst(s.x,s.y,'#aa44ff',28);burst(s.x,s.y,'#dd88ff',18);burst(s.x,s.y,'#ffffff',10);
+  auras.push({x:s.x,y:s.y,r:0,maxR:90,life:.4,maxLife:.4,rgb:'170,68,255'});
+  shake.t=.5;
+  for(let i=0;i<10;i++) xpGems.push({x:s.x+(Math.random()-.5)*50,y:s.y+(Math.random()-.5)*50,v:5,r:7});
+  hpDrops.push({x:s.x,y:s.y});
 }
 
 function burst(x,y,col,n){

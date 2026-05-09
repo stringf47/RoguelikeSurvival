@@ -147,9 +147,73 @@ canvas { display:block; touch-action:none; }
   border-radius:4px; display:flex; align-items:center; justify-content:center;
   font-size:19px; position:relative;
   transition:border-color .2s, box-shadow .2s;
+  pointer-events:auto; cursor:default;
 }
 .wslot:hover { border-color:#880000; box-shadow:0 0 8px #cc111133; }
 .wslot .wlv { position:absolute; bottom:1px; right:3px; font-size:9px; color:#cc1111; }
+
+/* ── LEGENDARY BAR ── */
+#legendaryBar {
+  position:absolute; top:52px; left:12px; display:flex; gap:5px;
+  animation: hudIn .5s ease .25s both;
+}
+.legSlot {
+  width:26px; height:26px; background:#0a0000; border:1px solid #6a2a00;
+  border-radius:3px; display:flex; align-items:center; justify-content:center;
+  font-size:14px; position:relative; pointer-events:auto; cursor:default;
+  transition:border-color .2s, box-shadow .2s;
+}
+.legSlot:hover { border-color:#cc8833; box-shadow:0 0 8px #cc883344; }
+
+/* ── SEAL BANNER ── */
+#sealBanner {
+  position:absolute; top:8px; left:50%; transform:translateX(-50%);
+  display:none; align-items:center;
+  background:rgba(20,5,35,.85); border:1px solid #8833cc;
+  padding:3px 16px; border-radius:12px; pointer-events:none; z-index:20;
+  white-space:nowrap;
+}
+#sealBanner.buffed { border-color:#cc2244; background:rgba(35,4,12,.88); }
+#sealTimer { font-size:13px; color:#dd99ff; letter-spacing:2px; font-variant-numeric:tabular-nums; }
+#sealMessage { font-size:10px; letter-spacing:2px; margin-top:5px; display:none; }
+
+/* ── SURGE BANNER ── */
+@keyframes surgePulse {
+  0%,100% { box-shadow:0 0 12px #ff660055; }
+  50%      { box-shadow:0 0 32px #ff8800bb; }
+}
+#surgeBanner {
+  position:absolute; top:8px; left:50%; transform:translateX(-50%);
+  display:none; flex-direction:column; align-items:center;
+  background:rgba(35,14,0,.92); border:1px solid #ff6600;
+  padding:5px 18px; border-radius:4px; pointer-events:none; z-index:19;
+  white-space:nowrap;
+}
+#surgeBanner.surge-warning { animation: surgePulse .8s ease-in-out infinite; border-color:#ffaa00; }
+#surgeBanner.surge-active  { border-color:#cc4400; }
+.surgeMain { font-size:12px; letter-spacing:2px; color:#ff8833; text-shadow:0 0 8px #ff660066; }
+.surgeCount { font-size:18px; color:#ffcc44; letter-spacing:1px; margin-top:2px; font-variant-numeric:tabular-nums; }
+
+/* ── CHEST INDICATOR ── */
+@keyframes chestPulse {
+  0%,100% { opacity:.45; transform:scale(1); }
+  50%      { opacity:1;   transform:scale(1.12); }
+}
+#chestIndicator {
+  display:none; font-size:12px; letter-spacing:2px; margin-top:16px;
+  color:#ffcc44; text-shadow:0 0 8px #ffaa0088;
+  pointer-events:auto; cursor:default;
+  animation: chestPulse 1.8s ease-in-out infinite;
+}
+
+/* ── TOOLTIP ── */
+#hudTooltip {
+  position:absolute; background:rgba(8,4,0,.92); border:1px solid #440000;
+  color:#ddaa77; font-size:11px; font-family:inherit; letter-spacing:1px;
+  padding:6px 10px; max-width:200px; line-height:1.5; pointer-events:none;
+  z-index:30; display:none; border-radius:2px;
+}
+#hudTooltip .tt-name { color:#ff6644; font-size:12px; display:block; margin-bottom:3px; letter-spacing:2px; }
 
 /* ── PAUSE OVERLAY ── */
 #pauseDim {
@@ -177,12 +241,22 @@ canvas { display:block; touch-action:none; }
   <button id="mobilePause" onclick="togglePause()">❙❙ PAUSE</button>
   <button id="muteBtn" onclick="toggleMute()">🔊</button>
 
+  <div id="hudTooltip"></div>
+  <div id="sealBanner">
+    <div id="sealTimer">⛧ 60s</div>
+  </div>
+  <div id="surgeBanner">
+    <div class="surgeMain" id="surgeBannerMain"></div>
+    <div class="surgeCount" id="surgeBannerCount" style="display:none"></div>
+  </div>
+
   <!-- HUD -->
   <div id="hud">
     <div id="hpWrap">
       <div id="hpLbl">♥ HEALTH<span id="hpNum">200 / 200</span></div>
       <div id="hpTrack"><div id="hpFill" style="width:100%"></div></div>
     </div>
+    <div id="legendaryBar"></div>
     <div id="stats">
       <div id="timer">00:00</div>
       <div id="lvldsp">✦ LVL 1</div>
@@ -190,6 +264,8 @@ canvas { display:block; touch-action:none; }
       <div id="dmgcnt">⚔ 0 DMG</div>
       <div id="dpscnt">⚡ 0 DPS</div>
       <div id="kcnt">✦ 0 SOULS FREED</div>
+      <div id="chestIndicator">✦ CHEST AVAILABLE</div>
+      <div id="sealMessage"></div>
     </div>
     <div id="wbar"></div>
     <div id="xpBar"><div id="xpFill" style="width:0%"></div></div>
@@ -207,9 +283,9 @@ canvas { display:block; touch-action:none; }
   <div id="menuScreen" class="screen">
     <h1>BUTTERBALL'S</h1><h2>LAST STAND</h2>
     <p>Move with WASD / Arrow Keys, or drag left side of screen</p>
-    <p>Weapons fire automatically — protect the flock until dawn</p>
+    <p>Weapons fire automatically</p>
+    <p>Protect the flock for the next 10 minutes</p>
     <p>Survive until dawn to save the farm</p>
-    <p style="margin-top:10px;color:#666">ESC or pause button to pause</p>
     <button class="btn" onclick="startGame()">HOLD UNTIL DAWN</button>
   </div>
 

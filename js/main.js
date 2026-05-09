@@ -1,6 +1,37 @@
 const CHEST_FILL_R=80;
-const CHEST_FILL_RATE=0.38;
+const CHEST_FILL_RATE=0.25;
 const CHEST_DRAIN_RATE=0.6;
+
+function activateSealBuff(){
+  if(sealBuffActive)return;
+  sealBuffActive=true;sealBuffT=60;
+  for(const e of enemies){
+    if(e.dead||e.sealBuffed)continue;
+    e.sealBuffed=true;
+    e.spd=Math.round(e.spd*1.4);
+    e.dmg=Math.ceil(e.dmg*1.4);
+    e.maxHp=Math.ceil(e.maxHp*1.25);
+    e.hp=Math.min(e.hp*1.25,e.maxHp);
+  }
+  shake.t=.9;
+  burst(pl.x,pl.y,'#aa44ff',20);burst(pl.x,pl.y,'#ff2244',14);
+  auras.push({x:pl.x,y:pl.y,r:0,maxR:400,life:.6,maxLife:.6,rgb:'170,68,255'});
+}
+
+function spawnSeal(){
+  let x,y;
+  for(let i=0;i<16;i++){
+    x=200+Math.random()*(WORLD-400);
+    y=200+Math.random()*(WORLD-400);
+    if(Math.hypot(x-pl.x,y-pl.y)>400)break;
+  }
+  const w=wave;
+  const iter=Math.max(0,sealSpawnIdx-1);
+  const hp=(200+w*150)*2;
+  sealSpottedT=2;
+  seals.push({x,y,id:++eid,timeLeft:60,hp,maxHp:hp,flash:0,fireT:1.5,
+    wave:w,iteration:iter,spinAngle:0,dead:false,isSeal:true});
+}
 
 function spawnChest(){
   let x,y;
@@ -36,7 +67,7 @@ function checkPlayerDeath(){
 
 function initPlayer(){
   pl={x:WORLD/2,y:WORLD/2,hp:150,maxHp:150,speed:160,level:1,xp:0,xpNext:10,
-      armor:0,regen:0,regenT:0,magnet:80,iframes:0,lastAngle:0,weapons:[],passives:{},
+      armor:0,regen:0,regenT:0,magnet:80,iframes:0,lastAngle:0,weapons:[],passives:{},infected:0,infectedT:0,
       rangeMult:1.0,dmgMult:1.0,atkSpeedMult:1.0,wAtkMult:{},wDmgMult:{},wLvDmgMult:1,wLvAtkMult:1,
       leanAng:0,leanVel:0};
   addWeapon('wand');
@@ -45,6 +76,8 @@ function initPlayer(){
 function update(dt){
   if(state!=='playing'||paused)return;
   gameTime+=dt;
+  if(sealSpottedT>0)sealSpottedT-=dt;
+  if(sealBuffActive&&sealBuffT>0){sealBuffT-=dt;if(sealBuffT<=0){sealBuffActive=false;sealBuffT=0;}}
   if(dmgLog.length>0)dmgLog=dmgLog.filter(d=>d.t>gameTime-10);
 
   if(gameTime>=WIN_TIME&&!endless){
@@ -61,11 +94,39 @@ function update(dt){
 
   wave=Math.min(ETYPES.length-1,Math.floor(gameTime/120));
   bgWave+=(wave-bgWave)*Math.min(1,dt*1.2);
+  enemyDmgMult=gameTime>=450?2:gameTime>=300?1.5:1;
   for(const m of HORDE_TIMES){if(!hordeT[m]&&gameTime>=m*60){hordeT[m]=1;spawnHorde();}}
 
   // Chest: spawn one every 2 minutes
   const chestDue=Math.floor(gameTime/120);
   if(chestDue>chestSpawnIdx){chestSpawnIdx=chestDue;spawnChest();}
+
+  // Seal: spawn at 1 min, then every 2 min (1,3,5,7...), only one active at a time
+  if(gameTime>=60&&seals.length===0){
+    const sealDue=1+Math.floor((gameTime-60)/120);
+    if(sealDue>sealSpawnIdx){sealSpawnIdx=sealDue;spawnSeal();}
+  }
+  for(const s of seals){
+    if(s.dead)continue;
+    s.timeLeft-=dt;
+    if(s.timeLeft<=0){s.dead=true;activateSealBuff();continue;}
+    s.flash=Math.max(0,s.flash-dt);
+    s.fireT-=dt;
+    if(s.fireT<=0){
+      const iter=s.iteration||0;
+      const shots=4+iter;
+      const fireInterval=Math.max(0.9,2.0-iter*0.25);
+      s.fireT=fireInterval;
+      const spd=140+iter*28;
+      const dmg=16+iter*10;
+      s.spinAngle+=Math.PI*2/shots*0.5;
+      for(let i=0;i<shots;i++){
+        const a=s.spinAngle+(i/shots)*Math.PI*2;
+        sealProjs.push({x:s.x,y:s.y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,dmg,r:7,life:5});
+      }
+    }
+  }
+  seals=seals.filter(s=>!s.dead&&s.timeLeft>0);
 
   // Chest fill logic
   for(const c of chests){
@@ -84,6 +145,16 @@ function update(dt){
   chests=chests.filter(c=>!c.done);
 
   if(pl.regen){pl.regenT+=dt;if(pl.regenT>=1){pl.regenT-=1;pl.hp=Math.min(pl.maxHp,pl.hp+pl.regen);}}
+  if(pl.infected>0){
+    pl.infectedT-=dt;
+    pl.hp-=pl.infected*2*dt;
+    if(pl.infectedT<=0)pl.infected=0;
+    if(Math.random()<dt*pl.infected*4&&particles.length<MAX_PARTICLES)
+      particles.push({x:pl.x+(Math.random()-.5)*18,y:pl.y+(Math.random()-.5)*14,
+        vx:(Math.random()-.5)*15,vy:18+Math.random()*25,
+        life:.35+Math.random()*.2,maxLife:.55,r:1.5+Math.random()*1.5,col:'#55cc22'});
+    checkPlayerDeath();
+  }
 
   const{dx,dy}=getDir();
   if(!playerFrozen){pl.x+=dx*pl.speed*dt;pl.y+=dy*pl.speed*dt;}
@@ -116,9 +187,9 @@ function update(dt){
   corruptedZones=corruptedZones.filter(z=>z.life>0);
 
   spawnT+=dt;
-  const spawnRate=Math.max(.30,2.6-gameTime/200);
-  const batchSize=1+Math.floor(gameTime/120);
-  if(spawnT>=spawnRate){spawnT-=spawnRate;for(let i=0;i<batchSize;i++)spawnEnemy();}
+  const spawnRate=Math.max(.55,2.8-gameTime/200);
+  const batchSize=Math.min(2,1+Math.floor(gameTime/240));
+  if(spawnT>=spawnRate&&enemies.length<100){spawnT-=spawnRate;for(let i=0;i<batchSize;i++)spawnEnemy();}
 
   for(const w of pl.weapons) WDEFS[w.type].fire(w,dt);
 
@@ -172,15 +243,32 @@ function update(dt){
           if(ed>0){e.chargeDx=ex/ed;e.chargeDy=ey/ed;}
         }
       }
-    }else if(e.name==='Egg Chucker'){
-      if(ed>0){e.x+=(ex/ed)*e.spd*sm*dt;e.y+=(ey/ed)*e.spd*sm*dt;}
-      e.eggT-=dt;
-      if(e.eggT<=0&&ed<420){
-        e.eggT=2.2+Math.random()*1.2;
-        const flightT=0.8+ed/500;
-        eggs.push({id:++eggId,sx:e.x,sy:e.y,x:e.x,y:e.y,
-          tx:pl.x+(Math.random()-.5)*30,ty:pl.y+(Math.random()-.5)*30,
-          t:0,maxT:flightT,dmg:e.dmg*1.7,done:false});
+    }else if(e.name==='Skeletal Scarecrow'){
+      if(e.zonePhase===null){
+        e.teleportT-=dt;
+        if(e.teleportT<=0){
+          const ta=Math.random()*Math.PI*2,td=90+Math.random()*110;
+          e.x=Math.max(60,Math.min(WORLD-60,pl.x+Math.cos(ta)*td));
+          e.y=Math.max(60,Math.min(WORLD-60,pl.y+Math.sin(ta)*td));
+          e.zoneX=e.x;e.zoneY=e.y;
+          e.zonePhase='telegraph';e.zoneT=1.8;
+          burst(e.x,e.y,'#c8c4a0',14);
+          auras.push({x:e.x,y:e.y,r:0,maxR:80,life:.35,maxLife:.35,rgb:'200,196,160'});
+        }
+      }else{
+        e.zoneT-=dt;
+        if(e.zonePhase==='telegraph'&&e.zoneT<=0){
+          e.zonePhase='active';e.zoneT=0.3;
+          if(pl.iframes<=0&&Math.hypot(pl.x-e.zoneX,pl.y-e.zoneY)<120){
+            const dmg=Math.max(1,e.dmg*enemyDmgMult-pl.armor);
+            pl.hp-=dmg;pl.iframes=.7;shake.t=.45;
+            playHitSound();burst(pl.x,pl.y,'#ff2222',10);checkPlayerDeath();
+          }
+        }else if(e.zonePhase==='active'&&e.zoneT<=0){
+          e.zonePhase='fade';e.zoneT=0.5;
+        }else if(e.zonePhase==='fade'&&e.zoneT<=0){
+          e.zonePhase=null;e.teleportT=2.5+Math.random()*2;
+        }
       }
     }else{
       if(ed>0){e.x+=(ex/ed)*e.spd*sm*dt;e.y+=(ey/ed)*e.spd*sm*dt;}
@@ -197,10 +285,11 @@ function update(dt){
     e.leanAng+=e.leanVel*dt;
 
     if(pl.iframes<=0&&ed<e.r+14){
-      const dmg=Math.max(1,e.dmg-pl.armor);
+      const dmg=Math.max(1,e.dmg*enemyDmgMult-pl.armor);
       pl.hp-=dmg;pl.iframes=.55;shake.t=.3;
       playHitSound();
       burst(pl.x,pl.y,'#ff2222',5);
+      if(e.name==='Plague Rat'){pl.infected=Math.min(5,pl.infected+1);pl.infectedT=4;}
       if(pl.martyrdom){
         const thornDmg=Math.max(dmg*1.5,15);
         for(const ne of enemies){if(!ne.dead&&Math.hypot(pl.x-ne.x,pl.y-ne.y)<130)hitEnemy(ne,thornDmg);}
@@ -210,34 +299,6 @@ function update(dt){
     }
   }
   enemies=enemies.filter(e=>!e.dead);
-
-  for(const eg of eggs){
-    eg.t+=dt;
-    const p=Math.min(1,eg.t/eg.maxT);
-    eg.x=eg.sx+(eg.tx-eg.sx)*p;
-    eg.y=eg.sy+(eg.ty-eg.sy)*p;
-    if(!eg.done&&particles.length<MAX_PARTICLES){
-      const arcH=55*Math.sin(Math.PI*p);
-      for(let i=0;i<2;i++){
-        particles.push({x:eg.x+(Math.random()-.5)*5,y:eg.y-arcH+(Math.random()-.5)*4,
-          vx:(Math.random()-.5)*22,vy:-10-Math.random()*16,
-          life:0.1+Math.random()*0.1,maxLife:0.2,r:1.5+Math.random()*2,
-          col:Math.random()>.5?'#ff5500':'#ffaa00'});
-      }
-    }
-    if(eg.t>=eg.maxT&&!eg.done){
-      eg.done=true;
-      if(Math.hypot(pl.x-eg.tx,pl.y-eg.ty)<28&&pl.iframes<=0){
-        const dmg=Math.max(1,eg.dmg-pl.armor);
-        pl.hp-=dmg;pl.iframes=.4;shake.t=.2;
-        playHitSound();
-        burst(pl.x,pl.y,'#ff2222',5);checkPlayerDeath();
-      }
-      burst(eg.tx,eg.ty,'#ff5500',10);
-      burst(eg.tx,eg.ty,'#ffcc00',6);
-    }
-  }
-  eggs=eggs.filter(eg=>!eg.done);
 
   for(const tc of toxicClouds){
     tc.life-=dt;
@@ -274,8 +335,34 @@ function update(dt){
         if(p.pierced>p.pierce){p.life=-1;break;}
       }
     }
+    if(p.life>0){
+      for(const s of seals){
+        if(s.dead)continue;
+        if(Math.hypot(p.x-s.x,p.y-s.y)<30+p.r){
+          hitSeal(s,p.dmg);p.pierced++;
+          if(p.pierced>p.pierce){p.life=-1;break;}
+        }
+      }
+    }
   }
   projs=projs.filter(p=>p.life>0);
+
+  for(const sp of sealProjs){
+    sp.x+=sp.vx*dt;sp.y+=sp.vy*dt;sp.life-=dt;
+    if(particles.length<MAX_PARTICLES&&Math.random()<0.65)
+      particles.push({x:sp.x+(Math.random()-.5)*sp.r,y:sp.y+(Math.random()-.5)*sp.r,
+        vx:(Math.random()-.5)*25,vy:(Math.random()-.5)*25,
+        life:.12+Math.random()*.1,maxLife:.22,r:1.5+Math.random()*3,col:'#9933cc'});
+    if(pl.iframes<=0&&Math.hypot(sp.x-pl.x,sp.y-pl.y)<sp.r+14){
+      const dmg=Math.max(1,sp.dmg-pl.armor);
+      pl.hp-=dmg;pl.iframes=.45;shake.t=.22;
+      playHitSound();
+      burst(pl.x,pl.y,'#ff2222',5);burst(sp.x,sp.y,'#aa44ff',6);
+      sp.life=-1;
+      checkPlayerDeath();
+    }
+  }
+  sealProjs=sealProjs.filter(sp=>sp.life>0);
 
   for(const a of auras){a.life-=dt;a.r=a.maxR*(1-a.life/a.maxLife);}
   auras=auras.filter(a=>a.life>0);
@@ -364,11 +451,18 @@ function quitToMenu(){
 
 function startGame(){
   state='playing';gameTime=0;kills=0;pendingLU=0;
-  enemies=[];projs=[];xpGems=[];auras=[];particles=[];lightnings=[];hpDrops=[];dmgNums=[];toxicClouds=[];eggs=[];magnetDrops=[];dmgLog=[];
-  spawnT=0;eggId=0;hordeT={};paused=false;wave=0;bgWave=0;totalDmg=0;totalXp=0;vacuumT=0;endless=false;chests=[];chestSpawnIdx=0;corruptedZones=[];
+  enemies=[];projs=[];xpGems=[];auras=[];particles=[];lightnings=[];hpDrops=[];dmgNums=[];toxicClouds=[];magnetDrops=[];dmgLog=[];
+  spawnT=0;hordeT={};sealSpottedT=0;sealBuffT=0;paused=false;wave=0;bgWave=0;totalDmg=0;totalXp=0;vacuumT=0;endless=false;chests=[];chestSpawnIdx=0;seals=[];sealSpawnIdx=0;sealProjs=[];sealBuffActive=false;corruptedZones=[];enemyDmgMult=1;
   _wbSig='';
   _setPause(false);
   ['menuScreen','goScreen','winScreen','lvlScreen'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+  // Pick one enemy per class for this run
+  const classes={};
+  for(const t of ETYPES){
+    if(t.cls){if(!classes[t.cls])classes[t.cls]=[];classes[t.cls].push(t);}
+  }
+  runPool=ETYPES.filter(t=>!t.cls);
+  for(const cls in classes){const pool=classes[cls];runPool.push(pool[Math.floor(Math.random()*pool.length)]);}
   initPlayer();spawnChest();updateHUD();initAudio();
   if(Tone.Transport.state!=='started')Tone.Transport.start();
 }

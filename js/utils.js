@@ -5,6 +5,11 @@ function nearest(){
     const d=Math.hypot(e.x-pl.x,e.y-pl.y);
     if(d<bd){bd=d;b=e;}
   }
+  for(const s of seals){
+    if(s.dead)continue;
+    const d=Math.hypot(s.x-pl.x,s.y-pl.y);
+    if(d<bd){bd=d;b=s;}
+  }
   return b;
 }
 

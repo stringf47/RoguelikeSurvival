@@ -1,6 +1,8 @@
 /* ── CONSTANTS ── */
 const W=800,H=600,WORLD=4000,WIN_TIME=10*60;
 
+function hitTarget(t,dmg){t.isSeal?hitSeal(t,dmg):hitEnemy(t,dmg);}
+
 /* ── WEAPON DEFINITIONS ── */
 const WDEFS={
   wand:{
@@ -45,10 +47,9 @@ const WDEFS={
       w.tickT+=dt*spd;
       if(w.tickT>=s.tickRate){
         w.tickT-=s.tickRate;
-        for(const e of enemies){
-          if(!e.dead&&Math.hypot(pl.x-e.x,pl.y-e.y)<s.r)
-            hitEnemy(e,s.tickDmg*(pl.wDmgMult[w.type]||1));
-        }
+        const td=s.tickDmg*(pl.wDmgMult[w.type]||1);
+        for(const e of enemies){if(!e.dead&&Math.hypot(pl.x-e.x,pl.y-e.y)<s.r)hitEnemy(e,td);}
+        for(const sl of seals){if(!sl.dead&&Math.hypot(pl.x-sl.x,pl.y-sl.y)<s.r)hitSeal(sl,td);}
       }
       if(s.pulse){
         if(w.pulseT===undefined)w.pulseT=s.pulseInterval;
@@ -56,10 +57,9 @@ const WDEFS={
         if(w.pulseT<=0){
           w.pulseT=s.pulseInterval;
           auras.push({x:pl.x,y:pl.y,r:s.r*.2,maxR:s.r*1.3,life:.5,maxLife:.5,rgb:'136,255,68'});
-          for(const e of enemies){
-            if(!e.dead&&Math.hypot(pl.x-e.x,pl.y-e.y)<s.r*1.25)
-              hitEnemy(e,s.pulseDmg*(pl.wDmgMult[w.type]||1));
-          }
+          const pd=s.pulseDmg*(pl.wDmgMult[w.type]||1);
+          for(const e of enemies){if(!e.dead&&Math.hypot(pl.x-e.x,pl.y-e.y)<s.r*1.25)hitEnemy(e,pd);}
+          for(const sl of seals){if(!sl.dead&&Math.hypot(pl.x-sl.x,pl.y-sl.y)<s.r*1.25)hitSeal(sl,pd);}
         }
       }
     }
@@ -99,6 +99,11 @@ const WDEFS={
           if(e.dead||o.hits.has(e.id))continue;
           if(Math.hypot(ox-e.x,oy-e.y)<18+e.r){hitEnemy(e,s.dmg*(pl.wDmgMult[w.type]||1));o.hits.add(e.id);setTimeout(()=>o.hits.delete(e.id),400);}
         }
+        for(const sl of seals){
+          const sk='s'+sl.id;
+          if(sl.dead||o.hits.has(sk))continue;
+          if(Math.hypot(ox-sl.x,oy-sl.y)<18+30){hitSeal(sl,s.dmg*(pl.wDmgMult[w.type]||1));o.hits.add(sk);setTimeout(()=>o.hits.delete(sk),400);}
+        }
       }
     }
   },
@@ -135,7 +140,7 @@ const WDEFS={
       let src=nearest();if(!src)return;
       if(Math.hypot(src.x-pl.x,src.y-pl.y)>s.r)return;
       w.t=0;
-      hitEnemy(src,s.dmg*(pl.wDmgMult[w.type]||1));
+      hitTarget(src,s.dmg*(pl.wDmgMult[w.type]||1));
       lightnings.push({x1:pl.x,y1:pl.y,x2:src.x,y2:src.y,life:.12});
       let last=src;
       for(let c=0;c<s.chains;c++){
@@ -162,7 +167,10 @@ const WDEFS={
     fire(w,dt){
       const s=WDEFS.tempest.stats(w.level);w.t+=dt;
       if(w.t<s.cd/wSpd(w))return;
-      const visible=enemies.filter(e=>!e.dead&&onScreen(e.x,e.y,e.r));
+      const visible=[
+        ...enemies.filter(e=>!e.dead&&onScreen(e.x,e.y,e.r)),
+        ...seals.filter(sl=>!sl.dead&&onScreen(sl.x,sl.y,30))
+      ];
       if(!visible.length)return;
       w.t=0;
       const targets=visible.sort(()=>Math.random()-.5).slice(0,s.strikes);
@@ -170,7 +178,7 @@ const WDEFS={
         const tgt=targets[i];
         setTimeout(()=>{
           if(tgt.dead)return;
-          hitEnemy(tgt,s.dmg*(pl.wDmgMult[w.type]||1));
+          hitTarget(tgt,s.dmg*(pl.wDmgMult[w.type]||1));
           lightnings.push({x1:tgt.x+(Math.random()-.5)*40,y1:tgt.y-520,x2:tgt.x,y2:tgt.y,life:.22,sky:true});
           lightnings.push({x1:tgt.x+(Math.random()-.5)*20,y1:tgt.y-520,x2:tgt.x+(Math.random()-.5)*8,y2:tgt.y,life:.14,sky:true});
           burst(tgt.x,tgt.y,'#aaddff',10);
@@ -184,7 +192,7 @@ const WDEFS={
       if(lv%3===0)return'Extra fireball · Damage & size up';
       return'Damage, size & cooldown up';
     },
-    stats(lv){return{cd:Math.max(.4,2.6-lv*.22),dmg:18+lv*8,r:16+lv*3,spd:200+lv*14,cnt:1+Math.floor(lv/3)}},
+    stats(lv){return{cd:Math.max(.4,2.6-lv*.22),dmg:10+lv*5,r:16+lv*3,spd:200+lv*14,cnt:1+Math.floor(lv/3)}},
     fire(w,dt){
       const s=WDEFS.flame.stats(w.level);w.t+=dt;
       if(w.t<s.cd/wSpd(w))return;
@@ -293,10 +301,11 @@ const PDEFS={
 /* ── ENEMY TYPES ── */
 const ETYPES=[
   {name:'Corrupt Pig',     r:13,hp:35, spd:33,dmg:12,xpV:2,xpC:2,col:'#cc6688',wave:0},
-  {name:'Cursed Crow',     r:8, hp:15, spd:46,dmg:8, xpV:1,xpC:1,col:'#2a1a4a',wave:1},
+  {name:'Cursed Crow',     r:8, hp:15, spd:46,dmg:8, xpV:1,xpC:1,col:'#2a1a4a',wave:1,cls:'B'},
+  {name:'Plague Rat',      r:5, hp:10, spd:60,dmg:4, xpV:1,xpC:1,col:'#a89080',wave:1,cls:'B'},
   {name:'Shambling Sheep', r:15,hp:220,spd:15,dmg:18,xpV:3,xpC:4,col:'#c8d4cc',wave:2},
   {name:'Ram Rusher',      r:14,hp:90, spd:24,dmg:20,xpV:3,xpC:1,col:'#8b7744',wave:3},
-  {name:'Egg Chucker',     r:10,hp:22, spd:19,dmg:14,xpV:2,xpC:1,col:'#ddaa55',wave:4},
+  {name:'Skeletal Scarecrow',r:15,hp:480,spd:0, dmg:30,xpV:8,xpC:2,col:'#c8c4a0',wave:4},
 ];
 
 /* ── BACKGROUND THEMES (per wave) ── */
