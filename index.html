@@ -8,11 +8,11 @@
 * { margin:0; padding:0; box-sizing:border-box; }
 body {
   background:#000;
-  display:flex; align-items:center; justify-content:center;
-  min-height:100vh; overflow:hidden;
+  width:100vw; height:100vh; overflow:hidden;
   font-family:'Georgia',serif;
+  position:relative;
 }
-#wrap { position:relative; width:800px; height:600px; transform-origin:center center; }
+#wrap { position:absolute; width:800px; height:600px; transform-origin:top left; }
 canvas { display:block; touch-action:none; }
 #mobilePause {
   position:absolute; top:8px; left:50%; transform:translateX(-50%);
@@ -172,7 +172,10 @@ canvas { display:block; touch-action:none; }
 (function(){
   function scale(){
     var s=Math.min(window.innerWidth/800,window.innerHeight/600);
-    document.getElementById('wrap').style.transform='scale('+s+')';
+    var w=document.getElementById('wrap');
+    w.style.transform='scale('+s+')';
+    w.style.left=Math.round((window.innerWidth-800*s)/2)+'px';
+    w.style.top=Math.round((window.innerHeight-600*s)/2)+'px';
   }
   window.addEventListener('resize',scale);
   scale();
