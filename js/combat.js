@@ -6,7 +6,7 @@ function spawnProj(x,y,vx,vy,dmg,pierce,type,r,col,glow,maxDist=Infinity){
 
 function hitEnemy(e,dmg){
   if(e.dead)return;
-  let mult=(pl.dmgMult||1)*(pl.wLvDmgMult||1);
+  let mult=(pl.dmgMult||1)*(pl.wLvDmgMult||1)*0.8;
   if(e.marked){mult*=2;e.marked=false;e.markT=0;}
   const actual=Math.max(1,dmg*mult);
   totalDmg+=Math.floor(actual);
