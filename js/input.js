@@ -7,11 +7,11 @@ function toCanvas(t){
   return{x:(t.clientX-r.left)*(800/r.width),y:(t.clientY-r.top)*(600/r.height)};
 }
 
-window.addEventListener('touchstart',e=>{
+canvas.addEventListener('touchstart',e=>{
   e.preventDefault();
   for(const t of e.changedTouches){
     const p=toCanvas(t);
-    if(p.x<400&&!joystick.active){
+    if(!joystick.active){
       joystick.active=true;joystick.id=t.identifier;
       joystick.baseX=p.x;joystick.baseY=p.y;
       joystick.knobX=p.x;joystick.knobY=p.y;
@@ -20,7 +20,8 @@ window.addEventListener('touchstart',e=>{
   }
 },{passive:false});
 
-window.addEventListener('touchmove',e=>{
+document.addEventListener('touchmove',e=>{
+  if(!joystick.active)return;
   e.preventDefault();
   for(const t of e.changedTouches){
     if(t.identifier===joystick.id){
@@ -37,8 +38,7 @@ window.addEventListener('touchmove',e=>{
   }
 },{passive:false});
 
-window.addEventListener('touchend',e=>{
-  e.preventDefault();
+document.addEventListener('touchend',e=>{
   for(const t of e.changedTouches){
     if(t.identifier===joystick.id){
       joystick.active=false;joystick.dx=0;joystick.dy=0;
