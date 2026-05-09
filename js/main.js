@@ -89,10 +89,10 @@ function checkPlayerDeath(){
 }
 
 function initPlayer(){
-  pl={x:WORLD/2,y:WORLD/2,hp:210,maxHp:210,speed:160,level:1,xp:0,xpNext:10,
+  pl={x:WORLD/2,y:WORLD/2,hp:210,maxHp:210,speed:230,level:1,xp:0,xpNext:10,
       armor:0,regen:1,regenT:0,magnet:80,iframes:0,lastAngle:0,weapons:[],passives:{},infected:0,infectedT:0,
       rangeMult:1.0,dmgMult:1.0,atkSpeedMult:1.0,wAtkMult:{},wDmgMult:{},wLvDmgMult:1,wLvAtkMult:1,
-      leanAng:0,leanVel:0,weakenedT:0,weakenMult:1,slowedT:0,bleedT:0};
+      leanAng:0,leanVel:0,vx:0,vy:0,weakenedT:0,weakenMult:1,slowedT:0,bleedT:0};
   addWeapon('wand');
 }
 
@@ -237,9 +237,16 @@ function update(dt){
 
   const{dx,dy}=getDir();
   const slowMult=(pl.slowedT||0)>0?0.8:1;
-  if(!playerFrozen){pl.x+=dx*pl.speed*slowMult*dt;pl.y+=dy*pl.speed*slowMult*dt;}
-  const targetLean=dx*0.26;
-  pl.leanVel+=(targetLean-pl.leanAng)*55*dt-pl.leanVel*9*dt;
+  if(!playerFrozen){
+    const tvx=dx*pl.speed*slowMult*1.2,tvy=dy*pl.speed*slowMult*0.78;
+    const rateX=(pl.vx||0)*tvx>=0?18:1.8;
+    const rateY=(pl.vy||0)*tvy>=0?18:3.5;
+    pl.vx=(pl.vx||0)+(tvx-(pl.vx||0))*rateX*dt;
+    pl.vy=(pl.vy||0)+(tvy-(pl.vy||0))*rateY*dt;
+    pl.x+=pl.vx*dt;pl.y+=pl.vy*dt;
+  }
+  const targetLean=(pl.vx||0)/pl.speed*0.10;
+  pl.leanVel+=(targetLean-pl.leanAng)*220*dt-pl.leanVel*20*dt;
   pl.leanAng+=pl.leanVel*dt;
   pl.x=Math.max(20,Math.min(WORLD-20,pl.x));
   pl.y=Math.max(20,Math.min(WORLD-20,pl.y));
