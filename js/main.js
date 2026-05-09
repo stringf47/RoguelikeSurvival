@@ -1,9 +1,11 @@
 let hasMovedOnce=false;
+const _tp=document.getElementById('touchPrompt');
+const _hudBtns=[document.getElementById('muteBtn'),document.getElementById('pauseBtn')];
+
 function onFirstMove(){
   hasMovedOnce=true;
-  ['muteBtn','pauseBtn'].forEach(id=>{const el=document.getElementById(id);if(el){el.style.transition='opacity 0.5s';el.style.opacity='1';}});
-  const tp=document.getElementById('touchPrompt');
-  if(tp){tp.style.transition='opacity 0.6s';tp.style.opacity='0';setTimeout(()=>{tp.style.display='none';},700);}
+  for(const el of _hudBtns){if(el){el.style.transition='opacity 0.5s';el.style.opacity='1';}}
+  if(_tp){_tp.style.transition='opacity 0.6s';_tp.style.opacity='0';setTimeout(()=>{_tp.style.display='none';},700);}
 }
 
 const CHEST_FILL_R=80;
@@ -565,9 +567,8 @@ function startGame(){
   ccSpawnIdx=0;crimsonCrossBuffActive=false;crimsonCrossBuffT=0;crimsonCrossDebuff='';paused=false;wave=0;bgWave=0;totalDmg=0;totalXp=0;vacuumT=0;endless=false;chests=[];chestSpawnIdx=0;seals=[];sealSpawnIdx=0;sealProjs=[];sealBuffActive=false;corruptedZones=[];enemyDmgMult=1;
   _wbSig='';
   hasMovedOnce=false;
-  ['muteBtn','pauseBtn'].forEach(id=>{const el=document.getElementById(id);if(el){el.style.opacity='0';el.style.transition='none';}});
-  const tp=document.getElementById('touchPrompt');
-  if(tp){tp.style.transition='none';tp.style.opacity='1';tp.style.display='block';}
+  for(const el of _hudBtns){if(el){el.style.transition='none';el.style.opacity='0';}}
+  if(_tp){_tp.style.transition='none';_tp.style.opacity='1';_tp.style.display='block';}
   _setPause(false);
   ['menuScreen','goScreen','winScreen','lvlScreen'].forEach(id=>document.getElementById(id).classList.add('hidden'));
   // Pick one enemy per class for this run

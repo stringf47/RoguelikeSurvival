@@ -208,7 +208,7 @@ function render(){
     if(!s.dead&&!onScreen(s.x,s.y,30))drawSealArrow(s);
   }
 
-  drawMinimap();
+  if(hasMovedOnce)drawMinimap();
 
   if(state==='playing'&&joystick.active){
     ctx.save();
@@ -586,30 +586,36 @@ function drawMinimap(){
   ctx.fillRect(mx,my,msW,msH);ctx.strokeRect(mx,my,msW,msH);
   ctx.fillStyle='#ff77aa';
   for(const e of enemies){ctx.fillRect(mx+e.x*scX-1,my+e.y*scY-1,2,2);}
-  ctx.fillStyle='#ffdd44';
-  for(const c of chests){ctx.beginPath();ctx.arc(mx+c.x*scX,my+c.y*scY,3,0,Math.PI*2);ctx.fill();}
-  for(const s of seals){
-    ctx.fillStyle=s.type==='cc'?'#ff3322':'#aa44ff';
-    ctx.beginPath();ctx.arc(mx+s.x*scX,my+s.y*scY,3,0,Math.PI*2);ctx.fill();
+  // Chests — single path
+  if(chests.length){
+    ctx.fillStyle='#ffdd44';ctx.beginPath();
+    for(const c of chests){ctx.moveTo(mx+c.x*scX+3,my+c.y*scY);ctx.arc(mx+c.x*scX,my+c.y*scY,3,0,Math.PI*2);}
+    ctx.fill();
   }
+  // Seals — batch by type
+  const _ssSeals=seals.filter(s=>s.type!=='cc'),_ccSeals=seals.filter(s=>s.type==='cc');
+  if(_ssSeals.length){ctx.fillStyle='#aa44ff';ctx.beginPath();for(const s of _ssSeals){ctx.moveTo(mx+s.x*scX+3,my+s.y*scY);ctx.arc(mx+s.x*scX,my+s.y*scY,3,0,Math.PI*2);}ctx.fill();}
+  if(_ccSeals.length){ctx.fillStyle='#ff3322';ctx.beginPath();for(const s of _ccSeals){ctx.moveTo(mx+s.x*scX+3,my+s.y*scY);ctx.arc(mx+s.x*scX,my+s.y*scY,3,0,Math.PI*2);}ctx.fill();}
+  // XP buckets
   _xpBuckets.fill(0);
   for(const g of xpGems){
     const bx=Math.min(5,(g.x/WORLD*6)|0),by=Math.min(3,(g.y/WORLDH*4)|0);
     _xpBuckets[by*6+bx]++;
   }
-  ctx.fillStyle='#555555';
+  ctx.fillStyle='#555555';ctx.beginPath();
   for(let i=0;i<24;i++){
     if(_xpBuckets[i]<20)continue;
+    const r=Math.min(4,1+_xpBuckets[i]*0.3);
     const cx=mx+((i%6)+0.5)/6*msW,cy=my+((i/6|0)+0.5)/4*msH;
-    ctx.beginPath();ctx.arc(cx,cy,Math.min(4,1+_xpBuckets[i]*0.3),0,Math.PI*2);ctx.fill();
+    ctx.moveTo(cx+r,cy);ctx.arc(cx,cy,r,0,Math.PI*2);
   }
+  ctx.fill();
+  // Drops — batch per color
   const _flash=Math.floor(_now/300)%2===0;
-  ctx.fillStyle=_flash?'#ff3344':'#ffffff';
-  for(const h of hpDrops){ctx.beginPath();ctx.arc(mx+h.x*scX,my+h.y*scY,2.5,0,Math.PI*2);ctx.fill();}
-  ctx.fillStyle=_flash?'#44aaff':'#ffffff';
-  for(const m of magnetDrops){ctx.beginPath();ctx.arc(mx+m.x*scX,my+m.y*scY,2.5,0,Math.PI*2);ctx.fill();}
-  ctx.fillStyle='#ffffff';
-  ctx.beginPath();ctx.arc(mx+pl.x*scX,my+pl.y*scY,3,0,Math.PI*2);ctx.fill();
+  if(hpDrops.length){ctx.fillStyle=_flash?'#ff3344':'#ffffff';ctx.beginPath();for(const h of hpDrops){ctx.moveTo(mx+h.x*scX+2.5,my+h.y*scY);ctx.arc(mx+h.x*scX,my+h.y*scY,2.5,0,Math.PI*2);}ctx.fill();}
+  if(magnetDrops.length){ctx.fillStyle=_flash?'#44aaff':'#ffffff';ctx.beginPath();for(const m of magnetDrops){ctx.moveTo(mx+m.x*scX+2.5,my+m.y*scY);ctx.arc(mx+m.x*scX,my+m.y*scY,2.5,0,Math.PI*2);}ctx.fill();}
+  // Player dot
+  ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(mx+pl.x*scX,my+pl.y*scY,3,0,Math.PI*2);ctx.fill();
   ctx.strokeStyle='rgba(204,34,34,.4)';ctx.lineWidth=1;
   ctx.strokeRect(mx+cam.x*scX,my+cam.y*scY,W*scX,H*scY);
 }
