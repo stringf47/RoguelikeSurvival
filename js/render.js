@@ -581,7 +581,7 @@ function drawPlayer(){
 }
 
 function drawMinimap(){
-  const msW=touchDevice?154:128,msH=touchDevice?116:96,mx=W-msW-12,my=H-msH-12;
+  const msW=154,msH=116,mx=touchDevice?(joySide==='left'?W-msW-12:12):12,my=H-msH-12;
   const scX=msW/WORLD,scY=msH/WORLDH;
   ctx.fillStyle='rgba(0,0,0,.55)';ctx.strokeStyle='#330000';ctx.lineWidth=1;
   ctx.fillRect(mx,my,msW,msH);ctx.strokeRect(mx,my,msW,msH);
