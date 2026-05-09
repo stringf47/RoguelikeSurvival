@@ -1,6 +1,7 @@
 const keys={};
-const JRADIUS=60;
-const joystick={active:false,id:-1,baseX:0,baseY:0,knobX:0,knobY:0,dx:0,dy:0};
+const JRADIUS=65;
+const JBASE={x:110,y:490};
+const joystick={active:false,id:-1,knobX:110,knobY:490,dx:0,dy:0};
 
 function toCanvas(t){
   const r=canvas.getBoundingClientRect();
@@ -10,11 +11,9 @@ function toCanvas(t){
 canvas.addEventListener('touchstart',e=>{
   e.preventDefault();
   for(const t of e.changedTouches){
-    const p=toCanvas(t);
     if(!joystick.active){
       joystick.active=true;joystick.id=t.identifier;
-      joystick.baseX=p.x;joystick.baseY=p.y;
-      joystick.knobX=p.x;joystick.knobY=p.y;
+      joystick.knobX=JBASE.x;joystick.knobY=JBASE.y;
       joystick.dx=0;joystick.dy=0;
     }
   }
@@ -26,14 +25,14 @@ document.addEventListener('touchmove',e=>{
   for(const t of e.changedTouches){
     if(t.identifier===joystick.id){
       const p=toCanvas(t);
-      const ddx=p.x-joystick.baseX,ddy=p.y-joystick.baseY;
+      const ddx=p.x-JBASE.x,ddy=p.y-JBASE.y;
       const dist=Math.hypot(ddx,ddy);
       const ang=Math.atan2(ddy,ddx);
       const clamped=Math.min(dist,JRADIUS);
-      joystick.knobX=joystick.baseX+Math.cos(ang)*clamped;
-      joystick.knobY=joystick.baseY+Math.sin(ang)*clamped;
-      joystick.dx=dist>8?Math.cos(ang):0;
-      joystick.dy=dist>8?Math.sin(ang):0;
+      joystick.knobX=JBASE.x+Math.cos(ang)*clamped;
+      joystick.knobY=JBASE.y+Math.sin(ang)*clamped;
+      joystick.dx=dist>10?Math.cos(ang):0;
+      joystick.dy=dist>10?Math.sin(ang):0;
     }
   }
 },{passive:false});
@@ -41,7 +40,9 @@ document.addEventListener('touchmove',e=>{
 document.addEventListener('touchend',e=>{
   for(const t of e.changedTouches){
     if(t.identifier===joystick.id){
-      joystick.active=false;joystick.dx=0;joystick.dy=0;
+      joystick.active=false;
+      joystick.knobX=JBASE.x;joystick.knobY=JBASE.y;
+      joystick.dx=0;joystick.dy=0;
     }
   }
 },{passive:false});

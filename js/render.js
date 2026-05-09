@@ -208,15 +208,16 @@ function render(){
 
   drawMinimap();
 
-  if(joystick.active){
+  if(state==='playing'){
     ctx.save();
-    ctx.globalAlpha=0.28;
-    ctx.beginPath();ctx.arc(joystick.baseX,joystick.baseY,JRADIUS,0,Math.PI*2);
-    ctx.strokeStyle='#ffffff';ctx.lineWidth=2;ctx.stroke();
-    ctx.fillStyle='rgba(255,255,255,0.08)';ctx.fill();
-    ctx.globalAlpha=0.5;
-    ctx.beginPath();ctx.arc(joystick.knobX,joystick.knobY,JRADIUS*0.38,0,Math.PI*2);
-    ctx.fillStyle='rgba(255,255,255,0.55)';ctx.fill();
+    const ja=joystick.active;
+    ctx.globalAlpha=ja?0.55:0.2;
+    ctx.beginPath();ctx.arc(JBASE.x,JBASE.y,JRADIUS,0,Math.PI*2);
+    ctx.strokeStyle='#ffffff';ctx.lineWidth=2.5;ctx.stroke();
+    ctx.fillStyle=`rgba(255,255,255,${ja?0.08:0.03})`;ctx.fill();
+    ctx.globalAlpha=ja?0.85:0.25;
+    ctx.beginPath();ctx.arc(joystick.knobX,joystick.knobY,JRADIUS*0.35,0,Math.PI*2);
+    ctx.fillStyle='#ffffff';ctx.fill();
     ctx.restore();
   }
 }
