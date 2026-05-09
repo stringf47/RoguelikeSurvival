@@ -1,15 +1,19 @@
+let _nearestCache=null,_nearestFrame=0;
 function nearest(){
+  if(_nearestFrame===gameTime)return _nearestCache;
+  _nearestFrame=gameTime;
   let b=null,bd=Infinity;
   for(const e of enemies){
     if(e.dead)continue;
-    const d=Math.hypot(e.x-pl.x,e.y-pl.y);
+    const dx=e.x-pl.x,dy=e.y-pl.y,d=dx*dx+dy*dy;
     if(d<bd){bd=d;b=e;}
   }
   for(const s of seals){
     if(s.dead)continue;
-    const d=Math.hypot(s.x-pl.x,s.y-pl.y);
+    const dx=s.x-pl.x,dy=s.y-pl.y,d=dx*dx+dy*dy;
     if(d<bd){bd=d;b=s;}
   }
+  _nearestCache=b;
   return b;
 }
 

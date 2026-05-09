@@ -101,8 +101,10 @@ function update(dt){
   gameTime+=dt;
   if(sealSpottedT>0)sealSpottedT-=dt;
   if(ccSpottedT>0)ccSpottedT-=dt;
-  sealVignette+=((seals.some(s=>s.type==='ss')?1:0)-sealVignette)*Math.min(1,dt*1.8);
-  crimsonVignette+=((seals.some(s=>s.type==='cc')?1:0)-crimsonVignette)*Math.min(1,dt*1.8);
+  let _hasSS=0,_hasCC=0;
+  for(const s of seals){if(!s.dead){if(s.type==='ss')_hasSS=1;else _hasCC=1;}}
+  sealVignette+=(_hasSS-sealVignette)*Math.min(1,dt*1.8);
+  crimsonVignette+=(_hasCC-crimsonVignette)*Math.min(1,dt*1.8);
   if(sealBuffActive&&sealBuffT>0){sealBuffT-=dt;if(sealBuffT<=0){sealBuffActive=false;sealBuffT=0;}}
   if(crimsonCrossBuffActive&&crimsonCrossBuffT>0){crimsonCrossBuffT-=dt;if(crimsonCrossBuffT<=0){crimsonCrossBuffActive=false;crimsonCrossBuffT=0;crimsonCrossDebuff='';}}
   if((pl.weakenedT||0)>0){pl.weakenedT-=dt;pl.weakenMult=0.7;}else{pl.weakenMult=1;}
@@ -115,7 +117,7 @@ function update(dt){
         life:.3+Math.random()*.2,maxLife:.5,r:1.5+Math.random()*1.5,col:'#cc1111'});
     checkPlayerDeath();
   }
-  if(dmgLog.length>0)dmgLog=dmgLog.filter(d=>d.t>gameTime-10);
+  if(dmgLog.length>120){for(let _i=dmgLog.length-1;_i>=0;_i--)if(dmgLog[_i].t<gameTime-10)dmgLog.splice(_i,1);}
 
   if(gameTime>=WIN_TIME&&!endless){
     state='win';
@@ -386,7 +388,7 @@ function update(dt){
       checkPlayerDeath();
     }
   }
-  enemies=enemies.filter(e=>!e.dead);
+  for(let _i=enemies.length-1;_i>=0;_i--)if(enemies[_i].dead){enemies[_i]=enemies[enemies.length-1];enemies.pop();}
 
   for(const tc of toxicClouds){
     tc.life-=dt;
@@ -441,7 +443,7 @@ function update(dt){
       }
     }
   }
-  projs=projs.filter(p=>p.life>0);
+  for(let _i=projs.length-1;_i>=0;_i--)if(projs[_i].life<=0){projs[_i]=projs[projs.length-1];projs.pop();}
 
   for(const sp of sealProjs){
     sp.x+=sp.vx*dt;sp.y+=sp.vy*dt;sp.life-=dt;
@@ -458,20 +460,21 @@ function update(dt){
       checkPlayerDeath();
     }
   }
-  sealProjs=sealProjs.filter(sp=>sp.life>0);
+  for(let _i=sealProjs.length-1;_i>=0;_i--)if(sealProjs[_i].life<=0){sealProjs[_i]=sealProjs[sealProjs.length-1];sealProjs.pop();}
 
   for(const a of auras){a.life-=dt;a.r=a.maxR*(1-a.life/a.maxLife);}
-  auras=auras.filter(a=>a.life>0);
+  for(let _i=auras.length-1;_i>=0;_i--)if(auras[_i].life<=0){auras[_i]=auras[auras.length-1];auras.pop();}
 
-  for(const l of lightnings)l.life-=dt;
-  lightnings=lightnings.filter(l=>l.life>0);
+  for(let _i=lightnings.length-1;_i>=0;_i--){lightnings[_i].life-=dt;if(lightnings[_i].life<=0){lightnings[_i]=lightnings[lightnings.length-1];lightnings.pop();}}
 
-  for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;const f=p.friction||.92;p.vx*=f;p.vy*=f;}
-  if(particles.length>MAX_PARTICLES)particles.splice(0,particles.length-MAX_PARTICLES);
-  particles=particles.filter(p=>p.life>0);
+  for(let _i=particles.length-1;_i>=0;_i--){
+    const p=particles[_i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;
+    const f=p.friction||.92;p.vx*=f;p.vy*=f;
+    if(p.life<=0){particles[_i]=particles[particles.length-1];particles.pop();}
+  }
+  if(particles.length>MAX_PARTICLES)particles.length=MAX_PARTICLES;
 
-  for(const d of dmgNums){d.y+=d.vy*dt;d.life-=dt;}
-  dmgNums=dmgNums.filter(d=>d.life>0);
+  for(let _i=dmgNums.length-1;_i>=0;_i--){const d=dmgNums[_i];d.y+=d.vy*dt;d.life-=dt;if(d.life<=0){dmgNums[_i]=dmgNums[dmgNums.length-1];dmgNums.pop();}}
 
   if(vacuumT>0)vacuumT-=dt;
 

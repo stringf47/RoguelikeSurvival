@@ -87,23 +87,28 @@ const WDEFS={
       return'Damage, range & orbit speed up';
     },
     stats(lv){return{dmg:22+lv*6,cnt:1+Math.floor(lv/2),r:90+lv*6,spd:2.6+lv*.14,cd:0}},
-    init(w){const s=WDEFS.bible.stats(w.level);w.orbs=Array.from({length:s.cnt},(_,i)=>({a:(i/s.cnt)*Math.PI*2,hits:new Set()}));},
+    init(w){const s=WDEFS.bible.stats(w.level);w.orbs=Array.from({length:s.cnt},(_,i)=>({a:(i/s.cnt)*Math.PI*2,hits:new Map()}));},
     fire(w,dt){
       const s=WDEFS.bible.stats(w.level);
-      while(w.orbs.length<s.cnt)w.orbs.push({a:Math.random()*Math.PI*2,hits:new Set()});
+      while(w.orbs.length<s.cnt)w.orbs.push({a:Math.random()*Math.PI*2,hits:new Map()});
       w.orbs=w.orbs.slice(0,s.cnt);
+      const dmg=s.dmg*(pl.wDmgMult[w.type]||1);
+      const exp=gameTime+0.4;
       for(const o of w.orbs){
         o.a+=s.spd*dt;
         const ox=pl.x+Math.cos(o.a)*s.r,oy=pl.y+Math.sin(o.a)*s.r;
         for(const e of enemies){
-          if(e.dead||o.hits.has(e.id))continue;
-          if(Math.hypot(ox-e.x,oy-e.y)<18+e.r){hitEnemy(e,s.dmg*(pl.wDmgMult[w.type]||1));o.hits.add(e.id);setTimeout(()=>o.hits.delete(e.id),400);}
+          if(e.dead)continue;
+          const t=o.hits.get(e.id);if(t&&t>gameTime)continue;
+          if(Math.hypot(ox-e.x,oy-e.y)<18+e.r){hitEnemy(e,dmg);o.hits.set(e.id,exp);}
         }
         for(const sl of seals){
-          const sk='s'+sl.id;
-          if(sl.dead||o.hits.has(sk))continue;
-          if(Math.hypot(ox-sl.x,oy-sl.y)<18+30){hitSeal(sl,s.dmg*(pl.wDmgMult[w.type]||1));o.hits.add(sk);setTimeout(()=>o.hits.delete(sk),400);}
+          if(sl.dead)continue;
+          const sk=sl.id|0x80000000;
+          const t=o.hits.get(sk);if(t&&t>gameTime)continue;
+          if(Math.hypot(ox-sl.x,oy-sl.y)<48){hitSeal(sl,dmg);o.hits.set(sk,exp);}
         }
+        if(o.hits.size>200){for(const[k,v]of o.hits)if(v<=gameTime)o.hits.delete(k);}
       }
     }
   },
@@ -165,24 +170,32 @@ const WDEFS={
     },
     stats(lv){return{cd:Math.max(.65,4.5-lv*.42),dmg:22+lv*14,strikes:1+Math.floor(lv/2)}},
     fire(w,dt){
-      const s=WDEFS.tempest.stats(w.level);w.t+=dt;
+      const s=WDEFS.tempest.stats(w.level);
+      w.pending=w.pending||[];
+      w.t+=dt;
+      // Process pending strikes
+      for(let i=w.pending.length-1;i>=0;i--){
+        const p=w.pending[i];
+        if(gameTime<p.fireAt)continue;
+        if(!p.tgt.dead){
+          hitTarget(p.tgt,p.dmg);
+          lightnings.push({x1:p.tgt.x+(Math.random()-.5)*40,y1:p.tgt.y-520,x2:p.tgt.x,y2:p.tgt.y,life:.22,sky:true});
+          lightnings.push({x1:p.tgt.x+(Math.random()-.5)*20,y1:p.tgt.y-520,x2:p.tgt.x+(Math.random()-.5)*8,y2:p.tgt.y,life:.14,sky:true});
+          burst(p.tgt.x,p.tgt.y,'#aaddff',10);
+        }
+        w.pending.splice(i,1);
+      }
       if(w.t<s.cd/wSpd(w))return;
-      const visible=[
-        ...enemies.filter(e=>!e.dead&&onScreen(e.x,e.y,e.r)),
-        ...seals.filter(sl=>!sl.dead&&onScreen(sl.x,sl.y,30))
-      ];
+      const dmg=s.dmg*(pl.wDmgMult[w.type]||1);
+      const visible=[];
+      for(const e of enemies){if(!e.dead&&onScreen(e.x,e.y,e.r))visible.push(e);}
+      for(const sl of seals){if(!sl.dead&&onScreen(sl.x,sl.y,30))visible.push(sl);}
       if(!visible.length)return;
       w.t=0;
-      const targets=visible.sort(()=>Math.random()-.5).slice(0,s.strikes);
-      for(let i=0;i<targets.length;i++){
-        const tgt=targets[i];
-        setTimeout(()=>{
-          if(tgt.dead)return;
-          hitTarget(tgt,s.dmg*(pl.wDmgMult[w.type]||1));
-          lightnings.push({x1:tgt.x+(Math.random()-.5)*40,y1:tgt.y-520,x2:tgt.x,y2:tgt.y,life:.22,sky:true});
-          lightnings.push({x1:tgt.x+(Math.random()-.5)*20,y1:tgt.y-520,x2:tgt.x+(Math.random()-.5)*8,y2:tgt.y,life:.14,sky:true});
-          burst(tgt.x,tgt.y,'#aaddff',10);
-        },i*80);
+      for(let i=0;i<Math.min(s.strikes,visible.length);i++){
+        const j=i+Math.floor(Math.random()*(visible.length-i));
+        const tmp=visible[i];visible[i]=visible[j];visible[j]=tmp;
+        w.pending.push({tgt:visible[i],dmg,fireAt:gameTime+i*0.08});
       }
     }
   },
