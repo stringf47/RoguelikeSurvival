@@ -581,11 +581,11 @@ function drawPlayer(){
 }
 
 function drawMinimap(){
-  const msW=touchDevice?256:128,msH=touchDevice?192:96,mx=W-msW-12,my=H-msH-12;
+  const msW=touchDevice?154:128,msH=touchDevice?116:96,mx=W-msW-12,my=H-msH-12;
   const scX=msW/WORLD,scY=msH/WORLDH;
   ctx.fillStyle='rgba(0,0,0,.55)';ctx.strokeStyle='#330000';ctx.lineWidth=1;
   ctx.fillRect(mx,my,msW,msH);ctx.strokeRect(mx,my,msW,msH);
-  ctx.fillStyle='#881111';
+  ctx.fillStyle='#ff77aa';
   for(const e of enemies){ctx.fillRect(mx+e.x*scX-1,my+e.y*scY-1,2,2);}
   ctx.fillStyle='#ffdd44';
   for(const c of chests){ctx.beginPath();ctx.arc(mx+c.x*scX,my+c.y*scY,3,0,Math.PI*2);ctx.fill();}
@@ -807,7 +807,7 @@ function drawSealArrow(seal){
   const dist=Math.floor(Math.hypot(seal.x-pl.x,seal.y-pl.y));
   const isCc=seal.type==='cc';
 
-  const cx=W/2,cy=H/2,pad=touchDevice?250:160;
+  const cx=W/2,cy=H/2,pad=touchDevice?210:240;
   const hw=cx-pad,hh=cy-pad;
   const cos=Math.cos(angle),sin=Math.sin(angle);
   const sX=cos!==0?hw/Math.abs(cos):Infinity;
@@ -836,7 +836,7 @@ function drawChestArrow(chest){
   const dist=Math.floor(Math.hypot(chest.x-pl.x,chest.y-pl.y));
 
   // Find screen-edge position along the angle
-  const cx=W/2,cy=H/2,pad=touchDevice?250:160;
+  const cx=W/2,cy=H/2,pad=touchDevice?210:240;
   const hw=cx-pad,hh=cy-pad;
   const cos=Math.cos(angle),sin=Math.sin(angle);
   const sX=cos!==0?hw/Math.abs(cos):Infinity;
