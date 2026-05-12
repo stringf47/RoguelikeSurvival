@@ -286,7 +286,7 @@ function update(dt){
 
   spawnT+=dt;
   const spawnRate=Math.max(1.0,2.8-gameTime/200);
-  const batchSize=Math.min(2,1+Math.floor(gameTime/240));
+  const batchSize=gameTime<60?3:Math.min(2,1+Math.floor(gameTime/240));
   if(enemies.length>40){
     enemies.sort((a,b)=>Math.hypot(b.x-pl.x,b.y-pl.y)-Math.hypot(a.x-pl.x,a.y-pl.y));
     enemies.splice(0,enemies.length-40);
