@@ -397,14 +397,15 @@ function update(dt){
       }
     }
 
-    if(e.name==='Shambling Sheep'&&!e.dying&&ed>0&&particles.length<MAX_PARTICLES){
+    if(e.name==='Shambling Sheep'&&!e.dying&&ed>0){
       e._trailT=(e._trailT||0)+dt;
-      if(e._trailT>0.08){
+      if(e._trailT>0.14){
         e._trailT=0;
-        const tr=1.8+Math.random()*2.2;
-        particles.push({x:e.x+(Math.random()-.5)*e.r*.6,y:e.y+(Math.random()-.5)*e.r*.6,
-          vx:(Math.random()-.5)*12,vy:(Math.random()-.5)*12,
-          life:0.35+Math.random()*0.25,maxLife:0.6,r:tr,col:'#44ff88',shrink:true});
+        const tr=3+Math.random()*3;
+        particles.push({x:e.x+(Math.random()-.5)*e.r*.8,y:e.y+(Math.random()-.5)*e.r*.8,
+          vx:(Math.random()-.5)*10,vy:(Math.random()-.5)*10,
+          life:0.5+Math.random()*0.3,maxLife:0.8,r:tr,col:'#44ff88'});
+        if(particles.length>MAX_PARTICLES)particles.length=MAX_PARTICLES;
       }
     }
 
@@ -624,6 +625,12 @@ function startGame(){
   runPool=ETYPES.filter(t=>!t.cls);
   for(const cls in classes){const pool=classes[cls];runPool.push(pool[Math.floor(Math.random()*pool.length)]);}
   initPlayer();spawnChest();updateHUD();initAudio();
+  // DEBUG: force spawn test mobs
+  wave=4;
+  ['Shambling Sheep','Swamp Snail','Funky Fox'].forEach(name=>{
+    const t=ETYPES.find(e=>e.name===name);
+    if(t)spawnEnemyAt(t,pl.x+200+(Math.random()-.5)*80,pl.y+(Math.random()-.5)*80);
+  });
   Tone.Transport.stop();
   Tone.Transport.position=0;
   Tone.Transport.start();
