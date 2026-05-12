@@ -781,7 +781,9 @@ function drawSealProjs(){
   for(const sp of sealProjs){
     if(!onScreen(sp.x,sp.y,sp.r+20))continue;
     const c=sp.crimson;
+    const a=c?Math.min(1,sp.life/0.6):1;
     ctx.save();ctx.translate(sp.x,sp.y);
+    if(c)ctx.globalAlpha=a;
     ctx.beginPath();ctx.arc(0,0,sp.r*1.5,0,Math.PI*2);
     ctx.fillStyle=c?'rgba(200,0,0,0.18)':'rgba(140,0,210,0.18)';
     ctx.shadowColor=c?'#ff2200':'#aa00ff';ctx.shadowBlur=22;ctx.fill();

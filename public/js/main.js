@@ -185,7 +185,7 @@ function update(dt){
         for(let i=0;i<numPts;i++){
           const a=s.orbitAngle+(i/numPts)*Math.PI*2;
           const ox=s.x+Math.cos(a)*50,oy=s.y+Math.sin(a)*50;
-          sealProjs.push({x:ox,y:oy,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,dmg,r:6,life:4,crimson:true});
+          sealProjs.push({x:ox,y:oy,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,dmg,r:6,life:1.8,crimson:true});
         }
       }
     }else{
