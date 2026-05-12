@@ -285,8 +285,8 @@ function update(dt){
   for(let _i=corruptedZones.length-1;_i>=0;_i--){corruptedZones[_i].life-=dt;if(corruptedZones[_i].life<=0){corruptedZones[_i]=corruptedZones[corruptedZones.length-1];corruptedZones.pop();}}
 
   spawnT+=dt;
-  const spawnRate=Math.max(1.0,2.8-gameTime/200);
-  const batchSize=gameTime<60?3:Math.min(2,1+Math.floor(gameTime/240));
+  const spawnRate=gameTime<60?2.0:Math.max(1.0,2.8-gameTime/200);
+  const batchSize=Math.min(2,1+Math.floor(gameTime/240));
   if(enemies.length>40){
     enemies.sort((a,b)=>Math.hypot(b.x-pl.x,b.y-pl.y)-Math.hypot(a.x-pl.x,a.y-pl.y));
     enemies.splice(0,enemies.length-40);
