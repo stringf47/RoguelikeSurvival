@@ -381,7 +381,7 @@ function update(dt){
       if(ed>0){
         e.wobbleT=(e.wobbleT||0)+dt;
         const px=-ey/ed,py=ex/ed;
-        const w=Math.sin(e.wobbleT*8)*1.1;
+        const w=Math.sin(e.wobbleT*16)*2.4;
         e.x+=(ex/ed+px*w)*e.spd*sm*dt;
         e.y+=(ey/ed+py*w)*e.spd*sm*dt;
       }
@@ -399,9 +399,9 @@ function update(dt){
 
     if(e.name==='Shambling Sheep'&&!e.dying&&ed>0){
       e._trailT=(e._trailT||0)+dt;
-      if(e._trailT>0.35){
+      if(e._trailT>0.55){
         e._trailT=0;
-        toxicClouds.push({x:e.x+(Math.random()-.5)*e.r*.6,y:e.y+(Math.random()-.5)*e.r*.6,r:0,maxR:18,life:4.5,maxLife:4.5,dmgT:0});
+        toxicClouds.push({x:e.x+(Math.random()-.5)*e.r*.6,y:e.y+(Math.random()-.5)*e.r*.6,r:0,maxR:18,life:7.0,maxLife:7.0,dmgT:0});
       }
     }
 
