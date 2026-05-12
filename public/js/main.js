@@ -49,7 +49,7 @@ function spawnCrimsonCross(){
     y=200+Math.random()*(WORLDH-400);
     if(Math.hypot(x-pl.x,y-pl.y)>400)break;
   }
-  const iter=Math.max(0,Math.floor((gameTime-180)/120));
+  const iter=Math.max(0,ccSpawnIdx-1);
   const hp=(200+wave*150)*2;
   const debuffs=['weakening','slow','bleed'];
   const debuff=debuffs[Math.floor(Math.random()*debuffs.length)];
@@ -145,7 +145,7 @@ function update(dt){
 
   wave=Math.min(ETYPES.length-1,Math.floor(gameTime/120));
   bgWave+=(wave-bgWave)*Math.min(1,dt*1.2);
-  enemyDmgMult=gameTime>=450?2:gameTime>=300?1.5:1;
+  enemyDmgMult=gameTime<300?1:1.5+0.5*Math.floor((gameTime-300)/150);
   for(const m of HORDE_TIMES){if(!hordeT[m]&&gameTime>=m*60){hordeT[m]=1;spawnHorde();}}
 
   // Chest: spawn one every 2 minutes
@@ -173,7 +173,7 @@ function update(dt){
     s.flash=Math.max(0,s.flash-dt);
     if(s.type==='cc'){
       const iter=s.iteration||0;
-      const numPts=iter>=1?4:3;
+      const numPts=Math.min(4,2+iter);
       const fireInterval=Math.max(0.22,0.38-iter*0.02);
       const orbitSpd=2.4+iter*0.3;
       const spd=130+iter*16;
