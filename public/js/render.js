@@ -56,6 +56,14 @@ function render(){
     ctx.shadowBlur=0;
   }
 
+  // Snail trails (slowing slime puddles)
+  for(const st of snailTrails){
+    const a=(st.life/st.maxLife)*0.55;
+    ctx.beginPath();ctx.arc(st.x,st.y,st.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(60,160,30,${a})`;ctx.fill();
+    ctx.strokeStyle=`rgba(120,220,60,${a*0.8})`;ctx.lineWidth=1.5;ctx.stroke();
+  }
+
   // Toxic clouds
   for(const tc of toxicClouds){
     const a=(tc.life/tc.maxLife)*.5;
@@ -365,6 +373,39 @@ function drawEnemy(e){
       ctx.globalAlpha=1;
     }
 
+  }else if(nm==='Swamp Snail'){
+    const r=e.r;
+    // Slime body (elongated blob extending forward)
+    ctx.fillStyle='#6a9a3a';
+    ctx.beginPath();ctx.ellipse(r*.25,r*.15,r*1.1,r*.65,0.2,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#3a6a14';ctx.lineWidth=1.5;ctx.stroke();
+    // Shell (spiral coil on top)
+    ctx.fillStyle='#8b6914';
+    ctx.beginPath();ctx.arc(-r*.1,-r*.2,r*.72,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#5a4008';ctx.lineWidth=2;ctx.stroke();
+    ctx.fillStyle='#c49a28';
+    ctx.beginPath();ctx.arc(-r*.1,-r*.2,r*.5,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#8b6914';
+    ctx.beginPath();ctx.arc(-r*.1,-r*.2,r*.3,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#c49a28';
+    ctx.beginPath();ctx.arc(-r*.1,-r*.2,r*.16,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#5a4008';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.arc(-r*.1,-r*.2,r*.5,Math.PI*.2,Math.PI*1.1);ctx.stroke();
+    ctx.beginPath();ctx.arc(-r*.1,-r*.2,r*.3,Math.PI*.3,Math.PI*1.3);ctx.stroke();
+    // Eye stalks
+    ctx.strokeStyle='#3a6a14';ctx.lineWidth=2;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(r*.5,0);ctx.lineTo(r*.6,-r*.55);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(r*.72,r*.1);ctx.lineTo(r*.85,-r*.42);ctx.stroke();
+    ctx.fillStyle='#1a0a2e';
+    ctx.beginPath();ctx.arc(r*.6,-r*.55,3.2,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(r*.85,-r*.42,3.2,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#88ff44';
+    ctx.beginPath();ctx.arc(r*.6,-r*.55,1.5,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(r*.85,-r*.42,1.5,0,Math.PI*2);ctx.fill();
+    // Slime sheen
+    ctx.fillStyle='rgba(150,255,80,.18)';
+    ctx.beginPath();ctx.ellipse(r*.3,r*.2,r*.9,r*.5,0.2,0,Math.PI*2);ctx.fill();
+
   }else if(nm==='Ram Rusher'){
     if(e.chargeState==='telegraphing'){
       const len=200,segs=5;
@@ -394,6 +435,43 @@ function drawEnemy(e){
     ctx.beginPath();ctx.arc(e.r*.28,-e.r*.1,1.6,0,Math.PI*2);ctx.fill();
     ctx.fillStyle='rgba(255,255,255,.5)';
     ctx.beginPath();ctx.arc(-e.r*.38,-e.r*.38,2,0,Math.PI*2);ctx.fill();
+
+  }else if(nm==='Funky Fox'){
+    const r=e.r;
+    // Bushy tail (drawn behind body)
+    ctx.strokeStyle='#e07830';ctx.lineWidth=r*.55;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(-r*.3,r*.1);ctx.quadraticCurveTo(-r*1.4,r*.6,-r*1.0,-r*.4);ctx.stroke();
+    ctx.strokeStyle='#f5dcc8';ctx.lineWidth=r*.22;
+    ctx.beginPath();ctx.moveTo(-r*.3,r*.1);ctx.quadraticCurveTo(-r*1.4,r*.6,-r*1.0,-r*.4);ctx.stroke();
+    // Body
+    ctx.fillStyle='#c85a1a';
+    ctx.beginPath();ctx.ellipse(0,r*.1,r*.72,r*.62,0,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#7a2e08';ctx.lineWidth=1.5;ctx.stroke();
+    // Head
+    ctx.fillStyle='#d96820';
+    ctx.beginPath();ctx.ellipse(r*.3,-r*.2,r*.55,r*.48,0.3,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#7a2e08';ctx.lineWidth=1.5;ctx.stroke();
+    // Snout/muzzle patch
+    ctx.fillStyle='#f5dcc8';
+    ctx.beginPath();ctx.ellipse(r*.72,-r*.18,r*.3,r*.22,0.3,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#c06060';
+    ctx.beginPath();ctx.arc(r*.88,-r*.18,r*.1,0,Math.PI*2);ctx.fill();
+    // Ears (pointy)
+    ctx.fillStyle='#d96820';
+    ctx.beginPath();ctx.moveTo(r*.1,-r*.55);ctx.lineTo(-r*.08,-r*1.1);ctx.lineTo(r*.32,-r*.58);ctx.closePath();ctx.fill();
+    ctx.beginPath();ctx.moveTo(r*.5,-r*.52);ctx.lineTo(r*.62,-r*1.08);ctx.lineTo(r*.72,-r*.5);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#f09060';
+    ctx.beginPath();ctx.moveTo(r*.12,-r*.6);ctx.lineTo(-r*.02,-r*.98);ctx.lineTo(r*.28,-r*.62);ctx.closePath();ctx.fill();
+    ctx.beginPath();ctx.moveTo(r*.52,-r*.56);ctx.lineTo(r*.62,-r*.96);ctx.lineTo(r*.68,-r*.54);ctx.closePath();ctx.fill();
+    // Eyes
+    ctx.fillStyle='#1a0a2e';
+    ctx.beginPath();ctx.arc(r*.38,-r*.28,2.8,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(r*.6,-r*.25,2.8,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#ff6600';
+    ctx.beginPath();ctx.arc(r*.38,-r*.28,1.4,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(r*.6,-r*.25,1.4,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.55)';
+    ctx.beginPath();ctx.arc(r*.33,-r*.34,1.2,0,Math.PI*2);ctx.fill();
 
   }else if(nm==='Plague Rat'){
     // Body

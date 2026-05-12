@@ -248,7 +248,7 @@ function update(dt){
   }
 
   const{dx,dy}=getDir();
-  const slowMult=(pl.slowedT||0)>0?0.8:1;
+  const slowMult=(pl.snailSlowT||0)>0?0.42:(pl.slowedT||0)>0?0.8:1;
   if(!playerFrozen){
     const tvx=dx*pl.speed*slowMult*1.2,tvy=dy*pl.speed*slowMult*0.9;
     const rateX=(pl.vx||0)*tvx>=0?18:1.8;
@@ -377,8 +377,35 @@ function update(dt){
           e.zonePhase=null;e.teleportT=2.2+Math.random()*2.0;
         }
       }
+    }else if(e.name==='Funky Fox'){
+      if(ed>0){
+        e.wobbleT=(e.wobbleT||0)+dt;
+        const px=-ey/ed,py=ex/ed;
+        const w=Math.sin(e.wobbleT*5)*0.6;
+        e.x+=(ex/ed+px*w)*e.spd*sm*dt;
+        e.y+=(ey/ed+py*w)*e.spd*sm*dt;
+      }
     }else{
       if(ed>0){e.x+=(ex/ed)*e.spd*sm*dt;e.y+=(ey/ed)*e.spd*sm*dt;}
+    }
+
+    if(e.name==='Swamp Snail'&&!e.dying&&ed>0){
+      e._trailT=(e._trailT||0)+dt;
+      if(e._trailT>0.22){
+        e._trailT=0;
+        snailTrails.push({x:e.x+(Math.random()-.5)*8,y:e.y+(Math.random()-.5)*8,r:18+Math.random()*6,life:6,maxLife:6});
+      }
+    }
+
+    if(e.name==='Shambling Sheep'&&!e.dying&&ed>0&&particles.length<MAX_PARTICLES){
+      e._trailT=(e._trailT||0)+dt;
+      if(e._trailT>0.08){
+        e._trailT=0;
+        const tr=1.8+Math.random()*2.2;
+        particles.push({x:e.x+(Math.random()-.5)*e.r*.6,y:e.y+(Math.random()-.5)*e.r*.6,
+          vx:(Math.random()-.5)*12,vy:(Math.random()-.5)*12,
+          life:0.35+Math.random()*0.25,maxLife:0.6,r:tr,col:'#44ff88',shrink:true});
+      }
     }
 
     if((e.kbT||0)>0){
@@ -427,6 +454,15 @@ function update(dt){
     }
   }
   for(let _i=toxicClouds.length-1;_i>=0;_i--)if(toxicClouds[_i].life<=0){toxicClouds[_i]=toxicClouds[toxicClouds.length-1];toxicClouds.pop();}
+
+  let inSlime=false;
+  for(const st of snailTrails){
+    st.life-=dt;
+    if(Math.hypot(pl.x-st.x,pl.y-st.y)<st.r+8)inSlime=true;
+  }
+  if(inSlime)pl.snailSlowT=0.25;
+  else if((pl.snailSlowT||0)>0)pl.snailSlowT-=dt;
+  for(let _i=snailTrails.length-1;_i>=0;_i--)if(snailTrails[_i].life<=0){snailTrails[_i]=snailTrails[snailTrails.length-1];snailTrails.pop();}
 
   for(const p of projs){
     p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;
@@ -571,7 +607,7 @@ function quitToMenu(){
 
 function startGame(){
   state='playing';gameTime=0;kills=0;pendingLU=0;
-  enemies=[];projs=[];xpGems=[];auras=[];particles=[];lightnings=[];hpDrops=[];dmgNums=[];toxicClouds=[];magnetDrops=[];dmgLog=[];
+  enemies=[];projs=[];xpGems=[];auras=[];particles=[];lightnings=[];hpDrops=[];dmgNums=[];toxicClouds=[];snailTrails=[];magnetDrops=[];dmgLog=[];
   spawnT=0;hordeT={};sealSpottedT=0;ccSpottedT=0;sealBuffT=0;sealVignette=0;crimsonVignette=0;
   ccSpawnIdx=0;crimsonCrossBuffActive=false;crimsonCrossBuffT=0;crimsonCrossDebuff='';paused=false;wave=0;bgWave=0;totalDmg=0;totalXp=0;vacuumT=0;endless=false;chests=[];chestSpawnIdx=0;seals=[];sealSpawnIdx=0;sealProjs=[];sealBuffActive=false;corruptedZones=[];enemyDmgMult=1;
   _wbSig='';

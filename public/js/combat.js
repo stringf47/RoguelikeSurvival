@@ -23,6 +23,13 @@ function killEnemy(e){
   if(e.name==='Shambling Sheep'&&!e.dying){
     e.hp=0;e.dying=true;e.dyingT=0.8;return;
   }
+  if(e.name==='Swamp Snail'){
+    burst(e.x,e.y,'#44cc44',20);burst(e.x,e.y,'#88ff88',10);
+    for(let i=0;i<6;i++){
+      const a=i/6*Math.PI*2,d=20+Math.random()*25;
+      snailTrails.push({x:e.x+Math.cos(a)*d,y:e.y+Math.sin(a)*d,r:22+Math.random()*10,life:8,maxLife:8});
+    }
+  }
   e.dead=true;kills++;
   if(gameTime>=300){
     xpGems.push({x:e.x+(Math.random()-.5)*18,y:e.y+(Math.random()-.5)*18,v:e.xpC*e.xpV,r:8,life:20,col:'#44aaff',glow:'#2266ee'});

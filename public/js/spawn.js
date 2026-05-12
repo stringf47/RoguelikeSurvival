@@ -20,7 +20,7 @@ function spawnEnemy(){
   const fade=gameTime>360?Math.min(1,(gameTime-360)/120):0;
   const weights=eligible.map(t=>{
     if(fade>0&&t.cls==='B')return Math.max(0.05,1-fade*0.95);
-    if(fade>0&&(t.name==='Shambling Sheep'||t.name==='Ram Rusher'))return 1+fade*2;
+    if(fade>0&&(t.name==='Shambling Sheep'||t.name==='Swamp Snail'||t.name==='Ram Rusher'||t.name==='Funky Fox'))return 1+fade*2;
     return 1;
   });
   const total=weights.reduce((s,w)=>s+w,0);

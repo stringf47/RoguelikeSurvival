@@ -316,8 +316,10 @@ const ETYPES=[
   {name:'Corrupt Pig',     r:13,hp:35, spd:33,dmg:12,xpV:2,xpC:2,col:'#cc6688',wave:0},
   {name:'Cursed Crow',     r:8, hp:15, spd:46,dmg:8, xpV:1,xpC:1,col:'#2a1a4a',wave:1,cls:'B'},
   {name:'Plague Rat',      r:5, hp:10, spd:60,dmg:4, xpV:1,xpC:1,col:'#a89080',wave:1,cls:'B'},
-  {name:'Shambling Sheep', r:15,hp:220,spd:15,dmg:18,xpV:3,xpC:4,col:'#c8d4cc',wave:2},
-  {name:'Ram Rusher',      r:14,hp:90, spd:24,dmg:20,xpV:3,xpC:1,col:'#8b7744',wave:3},
+  {name:'Shambling Sheep', r:15,hp:220,spd:15,dmg:18,xpV:3,xpC:4,col:'#c8d4cc',wave:2,cls:'A'},
+  {name:'Swamp Snail',     r:14,hp:240,spd:9, dmg:16,xpV:3,xpC:4,col:'#6a9a3a',wave:2,cls:'A'},
+  {name:'Ram Rusher',      r:14,hp:90, spd:24,dmg:20,xpV:3,xpC:1,col:'#8b7744',wave:3,cls:'C'},
+  {name:'Funky Fox',       r:11,hp:85, spd:52,dmg:18,xpV:3,xpC:1,col:'#c85a1a',wave:3,cls:'C'},
   {name:'Skeletal Scarecrow',r:15,hp:480,spd:0, dmg:30,xpV:8,xpC:2,col:'#c8c4a0',wave:4},
 ];
 
