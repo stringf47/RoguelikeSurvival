@@ -59,9 +59,10 @@ function render(){
   // Snail trails (slowing slime puddles)
   for(const st of snailTrails){
     const a=(st.life/st.maxLife)*0.55;
+    const rgb=st.col||'60,160,30';
     ctx.beginPath();ctx.arc(st.x,st.y,st.r,0,Math.PI*2);
-    ctx.fillStyle=`rgba(60,160,30,${a})`;ctx.fill();
-    ctx.strokeStyle=`rgba(120,220,60,${a*0.8})`;ctx.lineWidth=1.5;ctx.stroke();
+    ctx.fillStyle=`rgba(${rgb},${a})`;ctx.fill();
+    ctx.strokeStyle=`rgba(${rgb},${a*0.8})`;ctx.lineWidth=1.5;ctx.stroke();
   }
 
   // Toxic clouds

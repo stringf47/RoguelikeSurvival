@@ -393,7 +393,7 @@ function update(dt){
       e._trailT=(e._trailT||0)+dt;
       if(e._trailT>0.45){
         e._trailT=0;
-        snailTrails.push({x:e.x+(Math.random()-.5)*6,y:e.y+(Math.random()-.5)*6,r:10+Math.random()*4,life:5,maxLife:5});
+        snailTrails.push({x:e.x+(Math.random()-.5)*6,y:e.y+(Math.random()-.5)*6,r:10+Math.random()*4,life:8,maxLife:8,col:'120,40,180'});
       }
     }
 
@@ -401,7 +401,7 @@ function update(dt){
       e._trailT=(e._trailT||0)+dt;
       if(e._trailT>0.35){
         e._trailT=0;
-        toxicClouds.push({x:e.x+(Math.random()-.5)*e.r*.6,y:e.y+(Math.random()-.5)*e.r*.6,r:0,maxR:18,life:2.5,maxLife:2.5,dmgT:0});
+        toxicClouds.push({x:e.x+(Math.random()-.5)*e.r*.6,y:e.y+(Math.random()-.5)*e.r*.6,r:0,maxR:18,life:4.5,maxLife:4.5,dmgT:0});
       }
     }
 
