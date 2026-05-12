@@ -203,6 +203,15 @@ body {
   font-size:11px; letter-spacing:2px; color:#ee4444;
   text-transform:uppercase;
 }
+
+@media (max-width:700px) {
+  .hero { display:none; }
+  .panel {
+    flex:1; border-left:none;
+    padding:48px 28px;
+    background:#030000;
+  }
+}
 </style>
 </head>
 <body>
@@ -222,11 +231,11 @@ body {
 
 <div class="panel" id="panel">
   <div class="tabs">
-    <button class="tab"        id="tabLogin"    onclick="switchTab('login')">Sign In</button>
-    <button class="tab active" id="tabRegister" onclick="switchTab('register')">Register</button>
+    <button class="tab active" id="tabLogin"    onclick="switchTab('login')">Sign In</button>
+    <button class="tab"        id="tabRegister" onclick="switchTab('register')">Register</button>
   </div>
 
-  <div class="form" id="formLogin">
+  <div class="form active" id="formLogin">
     <div class="field">
       <label>Username</label>
       <input type="text" id="loginUser" placeholder="your username" autocomplete="username"/>
@@ -241,7 +250,7 @@ body {
     <button class="btn-primary" onclick="doLogin()">Enter the Stand</button>
   </div>
 
-  <div class="form active" id="formRegister">
+  <div class="form" id="formRegister">
     <div class="field">
       <label>Username</label>
       <input type="text" id="regUser" placeholder="3–24 characters" autocomplete="username"/>
@@ -325,7 +334,7 @@ async function doGuest() {
 }
 document.addEventListener('keydown', e => {
   if (e.key!=='Enter') return;
-  document.getElementById('formRegister').classList.contains('active') ? doRegister() : doLogin();
+  document.getElementById('formLogin').classList.contains('active') ? doLogin() : doRegister();
 });
 </script>
 </body>
