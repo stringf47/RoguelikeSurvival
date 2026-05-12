@@ -128,7 +128,7 @@ function update(dt){
         life:.3+Math.random()*.2,maxLife:.5,r:1.5+Math.random()*1.5,col:'#cc1111'});
     checkPlayerDeath();
   }
-  if(dmgLog.length>120){for(let _i=dmgLog.length-1;_i>=0;_i--)if(dmgLog[_i].t<gameTime-10)dmgLog.splice(_i,1);}
+  if(dmgLog.length>120){const _cut=gameTime-10;let _j=0;while(_j<dmgLog.length&&dmgLog[_j].t<_cut)_j++;if(_j>0)dmgLog.splice(0,_j);}
 
   if(gameTime>=WIN_TIME&&!endless){
     state='win';
@@ -173,11 +173,11 @@ function update(dt){
     s.flash=Math.max(0,s.flash-dt);
     if(s.type==='cc'){
       const iter=s.iteration||0;
-      const numPts=Math.min(6,2+Math.floor(iter/2));
-      const fireInterval=Math.max(0.1,0.25-iter*0.02);
-      const orbitSpd=1.2+iter*0.18;
-      const spd=160+iter*22;
-      const dmg=12+iter*7;
+      const numPts=Math.min(4,2+Math.floor(iter/3));
+      const fireInterval=Math.max(0.35,0.65-iter*0.03);
+      const orbitSpd=1.0+iter*0.12;
+      const spd=140+iter*18;
+      const dmg=10+iter*5;
       s.orbitAngle+=orbitSpd*dt;
       s.fireT-=dt;
       if(s.fireT<=0){
@@ -193,11 +193,11 @@ function update(dt){
       if(s.fireT<=0){
         const iter=s.iteration||0;
         const shots=4+iter;
-        const fireInterval=Math.max(0.9,2.0-iter*0.25);
+        const fireInterval=Math.max(0.7,1.6-iter*0.2);
         s.fireT=fireInterval;
-        const spd=140+iter*28;
+        const spd=150+iter*28;
         const dmg=16+iter*10;
-        s.spinAngle+=Math.PI*2/shots*0.5;
+        s.spinAngle+=2.4; // golden-angle offset — never repeats same directions
         for(let i=0;i<shots;i++){
           const a=s.spinAngle+(i/shots)*Math.PI*2;
           sealProjs.push({x:s.x,y:s.y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,dmg,r:7,life:5});
@@ -287,11 +287,11 @@ function update(dt){
   spawnT+=dt;
   const spawnRate=Math.max(1.0,2.8-gameTime/200);
   const batchSize=Math.min(2,1+Math.floor(gameTime/240));
-  if(enemies.length>50){
+  if(enemies.length>40){
     enemies.sort((a,b)=>Math.hypot(b.x-pl.x,b.y-pl.y)-Math.hypot(a.x-pl.x,a.y-pl.y));
-    enemies.splice(0,enemies.length-50);
+    enemies.splice(0,enemies.length-40);
   }
-  if(spawnT>=spawnRate&&enemies.length<50){spawnT-=spawnRate;for(let i=0;i<batchSize;i++)spawnEnemy();}
+  if(spawnT>=spawnRate&&enemies.length<40){spawnT-=spawnRate;for(let i=0;i<batchSize;i++)spawnEnemy();}
 
   for(const w of pl.weapons) WDEFS[w.type].fire(w,dt);
 
@@ -312,7 +312,11 @@ function update(dt){
         toxicClouds.push({x:e.x,y:e.y,r:0,maxR:55,life:4.0,maxLife:4.0,dmgT:0});
         burst(e.x,e.y,'#44ff88',16);
         e.dead=true;kills++;
-        for(let i=0;i<e.xpC;i++) xpGems.push({x:e.x+(Math.random()-.5)*18,y:e.y+(Math.random()-.5)*18,v:e.xpV,r:e.xpV>3?7:5});
+        if(gameTime>=300){
+          xpGems.push({x:e.x+(Math.random()-.5)*18,y:e.y+(Math.random()-.5)*18,v:e.xpC*e.xpV,r:8,life:20,col:'#44aaff',glow:'#2266ee'});
+        }else{
+          for(let i=0;i<e.xpC;i++) xpGems.push({x:e.x+(Math.random()-.5)*18,y:e.y+(Math.random()-.5)*18,v:e.xpV,r:e.xpV>3?7:5,life:20});
+        }
         if(Math.random()<.008) hpDrops.push({x:e.x,y:e.y});
         if(Math.random()<.003) magnetDrops.push({x:e.x,y:e.y});
       }
@@ -479,6 +483,7 @@ function update(dt){
     }
   }
   for(let _i=sealProjs.length-1;_i>=0;_i--)if(sealProjs[_i].life<=0){sealProjs[_i]=sealProjs[sealProjs.length-1];sealProjs.pop();}
+  if(sealProjs.length>200)sealProjs.length=200;
 
   for(const a of auras){a.life-=dt;a.r=a.maxR*(1-a.life/a.maxLife);}
   for(let _i=auras.length-1;_i>=0;_i--)if(auras[_i].life<=0){auras[_i]=auras[auras.length-1];auras.pop();}
@@ -498,6 +503,8 @@ function update(dt){
 
   for(let _i=xpGems.length-1;_i>=0;_i--){
     const g=xpGems[_i];
+    g.life-=dt;
+    if(g.life<=0){xpGems[_i]=xpGems[xpGems.length-1];xpGems.pop();continue;}
     const gx=pl.x-g.x,gy=pl.y-g.y,gd2=gx*gx+gy*gy;
     const gd=Math.sqrt(gd2);
     if(vacuumT>0||gd<pl.magnet){const pull=vacuumT>0?1200:Math.min(350,350*(1-gd/pl.magnet)+80);g.x+=(gx/gd)*pull*dt;g.y+=(gy/gd)*pull*dt;}

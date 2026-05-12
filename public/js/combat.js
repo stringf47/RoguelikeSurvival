@@ -24,7 +24,11 @@ function killEnemy(e){
     e.hp=0;e.dying=true;e.dyingT=0.8;return;
   }
   e.dead=true;kills++;
-  for(let i=0;i<e.xpC;i++) xpGems.push({x:e.x+(Math.random()-.5)*18,y:e.y+(Math.random()-.5)*18,v:e.xpV,r:e.xpV>3?7:5});
+  if(gameTime>=300){
+    xpGems.push({x:e.x+(Math.random()-.5)*18,y:e.y+(Math.random()-.5)*18,v:e.xpC*e.xpV,r:8,life:20,col:'#44aaff',glow:'#2266ee'});
+  }else{
+    for(let i=0;i<e.xpC;i++) xpGems.push({x:e.x+(Math.random()-.5)*18,y:e.y+(Math.random()-.5)*18,v:e.xpV,r:e.xpV>3?7:5,life:20});
+  }
   if(Math.random()<.008) hpDrops.push({x:e.x,y:e.y});
   if(Math.random()<.003) magnetDrops.push({x:e.x,y:e.y});
   deathBurst(e.x,e.y,e.col);
@@ -67,7 +71,11 @@ function killSeal(s){
   burst(s.x,s.y,'#aa44ff',28);burst(s.x,s.y,'#dd88ff',18);burst(s.x,s.y,'#ffffff',10);
   auras.push({x:s.x,y:s.y,r:0,maxR:90,life:.4,maxLife:.4,rgb:'170,68,255'});
   shake.t=.5;
-  for(let i=0;i<10;i++) xpGems.push({x:s.x+(Math.random()-.5)*50,y:s.y+(Math.random()-.5)*50,v:5,r:7});
+  if(gameTime>=300){
+    for(let i=0;i<3;i++) xpGems.push({x:s.x+(Math.random()-.5)*50,y:s.y+(Math.random()-.5)*50,v:17,r:9,life:20,col:'#44aaff',glow:'#2266ee'});
+  }else{
+    for(let i=0;i<10;i++) xpGems.push({x:s.x+(Math.random()-.5)*50,y:s.y+(Math.random()-.5)*50,v:5,r:7,life:20});
+  }
   hpDrops.push({x:s.x,y:s.y});
 }
 

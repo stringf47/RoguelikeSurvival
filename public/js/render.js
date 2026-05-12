@@ -1,8 +1,6 @@
-const _xpBuckets=new Uint16Array(24); // 6x4 grid
-
 let _now=0;
 function render(){
-  _now=_now;
+  _now=performance.now();
   ctx.clearRect(0,0,W,H);
   ctx.save();
   ctx.translate(shake.x-cam.x,shake.y-cam.y);
@@ -13,8 +11,9 @@ function render(){
   for(const g of xpGems){
     if(!onScreen(g.x,g.y,20))continue;
     ctx.save();ctx.translate(g.x,g.y);
+    if(g.life<3)ctx.globalAlpha=Math.max(0,g.life/3);
     ctx.beginPath();ctx.moveTo(0,-g.r);ctx.lineTo(g.r*.6,0);ctx.lineTo(0,g.r);ctx.lineTo(-g.r*.6,0);ctx.closePath();
-    ctx.fillStyle='#f0c040';ctx.shadowColor='#c97d2e';ctx.shadowBlur=10;ctx.fill();
+    ctx.fillStyle=g.col||'#f0c040';ctx.shadowColor=g.glow||'#c97d2e';ctx.shadowBlur=10;ctx.fill();
     ctx.restore();
   }
 
@@ -596,20 +595,6 @@ function drawMinimap(){
   const _ssSeals=seals.filter(s=>s.type!=='cc'),_ccSeals=seals.filter(s=>s.type==='cc');
   if(_ssSeals.length){ctx.fillStyle='#aa44ff';ctx.beginPath();for(const s of _ssSeals){ctx.moveTo(mx+s.x*scX+3,my+s.y*scY);ctx.arc(mx+s.x*scX,my+s.y*scY,3,0,Math.PI*2);}ctx.fill();}
   if(_ccSeals.length){ctx.fillStyle='#ff3322';ctx.beginPath();for(const s of _ccSeals){ctx.moveTo(mx+s.x*scX+3,my+s.y*scY);ctx.arc(mx+s.x*scX,my+s.y*scY,3,0,Math.PI*2);}ctx.fill();}
-  // XP buckets
-  _xpBuckets.fill(0);
-  for(const g of xpGems){
-    const bx=Math.min(5,(g.x/WORLD*6)|0),by=Math.min(3,(g.y/WORLDH*4)|0);
-    _xpBuckets[by*6+bx]++;
-  }
-  ctx.fillStyle='#555555';ctx.beginPath();
-  for(let i=0;i<24;i++){
-    if(_xpBuckets[i]<20)continue;
-    const r=Math.min(4,1+_xpBuckets[i]*0.3);
-    const cx=mx+((i%6)+0.5)/6*msW,cy=my+((i/6|0)+0.5)/4*msH;
-    ctx.moveTo(cx+r,cy);ctx.arc(cx,cy,r,0,Math.PI*2);
-  }
-  ctx.fill();
   // Drops — batch per color
   const _flash=Math.floor(_now/300)%2===0;
   if(hpDrops.length){ctx.fillStyle=_flash?'#ff3344':'#ffffff';ctx.beginPath();for(const h of hpDrops){ctx.moveTo(mx+h.x*scX+2.5,my+h.y*scY);ctx.arc(mx+h.x*scX,my+h.y*scY,2.5,0,Math.PI*2);}ctx.fill();}
