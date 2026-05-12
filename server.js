@@ -1,8 +1,9 @@
-const express = require('express');
-const session = require('express-session');
-const path = require('path');
+const express  = require('express');
+const session  = require('express-session');
+const path     = require('path');
+const { initSchema } = require('./db');
 
-const app = express();
+const app  = express();
 const PORT = process.env.PORT || 4000;
 
 app.use(express.json());
@@ -17,17 +18,15 @@ app.use(session({
 
 app.get('/health', (req, res) => res.json({ ok: true }));
 
-app.use('/api/auth', require('./routes/auth'));
+app.use('/api/auth',   require('./routes/auth'));
 app.use('/api/scores', require('./routes/scores'));
-app.use('/api/admin', require('./routes/admin'));
+app.use('/api/admin',  require('./routes/admin'));
 
-// Redirect root to login if not authenticated
 app.get('/', (req, res, next) => {
   if (!req.session.user) return res.redirect('/login');
   next();
 });
 
-// Serve login page before static (so /login doesn't need to be in public/)
 app.get('/login', (req, res) => {
   if (req.session.user) return res.redirect('/');
   res.sendFile(path.join(__dirname, 'views', 'login.html'));
@@ -51,6 +50,6 @@ app.get('/admin', (req, res) => {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-});
+initSchema()
+  .then(() => app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`)))
+  .catch(err => { console.error('DB init failed:', err); process.exit(1); });
