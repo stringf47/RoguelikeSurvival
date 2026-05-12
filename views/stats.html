@@ -358,7 +358,7 @@ tr.best:hover   { background:#1a0e00; }
 <script>
 const fmt    =s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(Math.floor(s%60)).padStart(2,'0');
 const fmtNum =n=>n>=1000?(n/1000).toFixed(1)+'k':n;
-const fmtDate=u=>new Date(u*1000).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'2-digit'});
+const fmtDate=u=>{const d=new Date(u*1000);return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'2-digit'})+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});};
 
 let _isGuest=false;
 

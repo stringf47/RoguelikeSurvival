@@ -324,7 +324,7 @@ td.date   { color:#aa3333; font-size:11px; letter-spacing:1px; }
 
 <script>
 const fmt    = s => String(Math.floor(s/60)).padStart(2,'0')+':'+String(Math.floor(s%60)).padStart(2,'0');
-const fmtDate= u => new Date(u*1000).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'2-digit'});
+const fmtDate= u => {const d=new Date(u*1000);return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'2-digit'})+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});};
 const esc    = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
 function toggleMenu(){
