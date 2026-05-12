@@ -100,35 +100,30 @@ function initAudio(){
   },['A2',null,'E2','D#2','A2','G2',null,'F#2'],'8n').start(0);
 
   // ── SEQUENCES ──
+  const _k=A_KEYS[0];
+
   new Tone.Sequence(time=>{
-    const k=A_KEYS[Math.min(Math.floor(bgWave||0),A_KEYS.length-1)];
-    _pad.triggerAttackRelease(k.pad,'2n',time);
+    _pad.triggerAttackRelease(_k.pad,'2n',time);
   },[0],'1m').start(0);
 
   let bs=0;
   new Tone.Sequence(time=>{
-    const k=A_KEYS[Math.min(Math.floor(bgWave||0),A_KEYS.length-1)];
-    const wi=Math.min(Math.floor(bgWave||0),A_KEYS.length-1);
     const pos=bs%8;
-    if(pos===0||pos===4) _bass.triggerAttackRelease(k.pad[0],'8n',time);
-    else if(wi>=1&&(pos===2||pos===6)) _bass.triggerAttackRelease(k.pad[0],'16n',time);
+    if(pos===0||pos===4) _bass.triggerAttackRelease(_k.pad[0],'8n',time);
     bs++;
   },[0,1,2,3,4,5,6,7],'8n').start(0);
 
   new Tone.Sequence((time,val)=>{
     if(val===null)return;
-    const k=A_KEYS[Math.min(Math.floor(bgWave||0),A_KEYS.length-1)];
-    _lead.triggerAttackRelease(k.mel[val%k.mel.length],'4n',time);
+    _lead.triggerAttackRelease(_k.mel[val%_k.mel.length],'4n',time);
   },ARP_PAT,'8n').start(0);
 
   let ds=0;
   new Tone.Sequence(time=>{
-    const wi=Math.min(Math.floor(bgWave||0),A_KEYS.length-1);
     const pos=ds%16;
     if(pos%4===0) _kick.triggerAttackRelease('C1','8n',time);
     if(pos===4||pos===12) _snare.triggerAttackRelease('16n',time);
-    if(wi>=2&&(pos===2||pos===10)) _snare.triggerAttackRelease('32n',time);
-    if(pos%4===0||wi>=1&&pos%2===0||wi>=3) _hat.triggerAttackRelease('16n',time);
+    if(pos%4===0) _hat.triggerAttackRelease('16n',time);
     ds++;
   },[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],'16n').start(0);
 
@@ -138,8 +133,6 @@ function initAudio(){
 
 function tickAudio(){
   if(!_ready)return;
-  const wi=Math.min(Math.floor(bgWave||0),A_TEMPOS.length-1);
-  if(wi!==_lastWi){_lastWi=wi;Tone.Transport.bpm.rampTo(A_TEMPOS[wi],2.5);}
 
   const playing=typeof state!=='undefined'&&state==='playing';
   const nearChest=playing&&typeof chests!=='undefined'&&chests.some(c=>!c.done&&Math.hypot(pl.x-c.x,pl.y-c.y)<CHEST_FILL_R);

@@ -173,7 +173,7 @@ function update(dt){
     s.flash=Math.max(0,s.flash-dt);
     if(s.type==='cc'){
       const iter=s.iteration||0;
-      const numPts=Math.min(4,2+Math.floor(iter/3));
+      const numPts=Math.min(4,2+iter);
       const fireInterval=Math.max(0.35,0.65-iter*0.03);
       const orbitSpd=1.0+iter*0.12;
       const spd=140+iter*18;
@@ -358,7 +358,7 @@ function update(dt){
           e.x=Math.max(60,Math.min(WORLD-60,pl.x+Math.cos(ta)*td));
           e.y=Math.max(60,Math.min(WORLDH-60,pl.y+Math.sin(ta)*td));
           e.zoneX=e.x;e.zoneY=e.y;e.appearT=0.5;
-          e.zonePhase='telegraph';e.zoneT=1.8;
+          e.zonePhase='telegraph';e.zoneT=1.0;
           burst(e.x,e.y,'#c8c4a0',14);
           auras.push({x:e.x,y:e.y,r:0,maxR:80,life:.35,maxLife:.35,rgb:'200,196,160'});
         }
@@ -366,7 +366,7 @@ function update(dt){
         e.zoneT-=dt;
         if(e.zonePhase==='telegraph'&&e.zoneT<=0){
           e.zonePhase='active';e.zoneT=0.25;
-          if(pl.iframes<=0&&Math.hypot(pl.x-e.zoneX,pl.y-e.zoneY)<120){
+          if(pl.iframes<=0&&Math.hypot(pl.x-e.zoneX,pl.y-e.zoneY)<170){
             const dmg=Math.max(1,e.dmg*enemyDmgMult-pl.armor);
             pl.hp-=dmg;pl.iframes=.7;shake.t=.45;
             playHitSound();burst(pl.x,pl.y,'#ff2222',10);checkPlayerDeath();
@@ -374,7 +374,7 @@ function update(dt){
         }else if(e.zonePhase==='active'&&e.zoneT<=0){
           e.zonePhase='fade';e.zoneT=1.5;
         }else if(e.zonePhase==='fade'&&e.zoneT<=0){
-          e.zonePhase=null;e.teleportT=2.5+Math.random()*2;
+          e.zonePhase=null;e.teleportT=1.5+Math.random()*1.5;
         }
       }
     }else{

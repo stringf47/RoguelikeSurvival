@@ -450,20 +450,21 @@ function drawEnemy(e){
 
     // Body glow signals telegraph / active phase
     if(zp==='telegraph'){
-      const prog=1-zt/1.8;
+      const prog=1-zt/1.0;
       const pulse=0.5+Math.sin(_now*.018)*0.5;
-      ctx.beginPath();ctx.ellipse(0,-e.r*1.1,e.r*2.4,e.r*2.9,0,0,Math.PI*2);
-      ctx.strokeStyle=`rgba(255,${Math.floor(120*(1-prog))},0,${0.18+prog*0.62+pulse*0.1})`;
+      ctx.beginPath();ctx.arc(0,0,170,0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,80,0,${0.06+prog*0.12})`;ctx.fill();
+      ctx.strokeStyle=`rgba(255,${Math.floor(120*(1-prog))},0,${0.25+prog*0.65+pulse*0.1})`;
       ctx.lineWidth=3+prog*4;
       ctx.shadowColor='#ff2200';ctx.shadowBlur=10+prog*26+pulse*8;
       ctx.stroke();ctx.shadowBlur=0;
     }else if(zp==='active'){
-      ctx.beginPath();ctx.ellipse(0,-e.r*1.1,e.r*2.4,e.r*2.9,0,0,Math.PI*2);
+      ctx.beginPath();ctx.arc(0,0,170,0,Math.PI*2);
       ctx.fillStyle='rgba(255,180,60,0.32)';
       ctx.shadowColor='#ffffff';ctx.shadowBlur=44;ctx.fill();ctx.shadowBlur=0;
     }else if(zp==='fade'){
       const a=zt/1.5;
-      ctx.beginPath();ctx.ellipse(0,-e.r*1.1,e.r*2.4,e.r*2.9,0,0,Math.PI*2);
+      ctx.beginPath();ctx.arc(0,0,170,0,Math.PI*2);
       ctx.strokeStyle=`rgba(255,120,0,${a*0.35})`;ctx.lineWidth=2;
       ctx.shadowColor='#ff4400';ctx.shadowBlur=a*14;ctx.stroke();ctx.shadowBlur=0;
     }
@@ -487,7 +488,7 @@ function drawEnemy(e){
     ctx.beginPath();ctx.ellipse(-e.r*.28,-e.r*2.3,e.r*.2,e.r*.22,0,0,Math.PI*2);ctx.fill();
     ctx.beginPath();ctx.ellipse(e.r*.28,-e.r*2.3,e.r*.2,e.r*.22,0,0,Math.PI*2);ctx.fill();
     // Glowing eyes — color/intensity driven by phase
-    const eyeCol=zp==='active'?'#ffffff':zp==='telegraph'?`rgb(255,${Math.floor(68*(zt/1.8))},0)`:'#ff4400';
+    const eyeCol=zp==='active'?'#ffffff':zp==='telegraph'?`rgb(255,${Math.floor(68*(zt/1.0))},0)`:'#ff4400';
     const eyeBlur=zp==='active'?32:zp==='telegraph'?10+(1-zt/1.8)*24:8;
     ctx.fillStyle=eyeCol;ctx.shadowColor=eyeCol;ctx.shadowBlur=eyeBlur;
     ctx.beginPath();ctx.ellipse(-e.r*.28,-e.r*2.3,e.r*.1,e.r*.12,0,0,Math.PI*2);ctx.fill();
