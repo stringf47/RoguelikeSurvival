@@ -8,7 +8,7 @@
 * { margin:0; padding:0; box-sizing:border-box; }
 
 body {
-  background:#0d0000;
+  background:#030000;
   font-family:'Georgia',serif;
   min-height:100vh; display:flex; flex-direction:column;
   color:#fff;
@@ -165,10 +165,10 @@ tr.you:hover   { background:#220000; }
   <div class="brand">BUTTERBALL'S LAST STAND</div>
   <nav>
     <div class="nu" id="navUser"></div>
-    <a href="/leaderboard" class="nl active">Leaderboard</a>
-    <a href="/stats" class="nl">My Stats</a>
-    <a href="#" class="nl out" onclick="logout()">Sign Out</a>
-    <a href="/" class="nl play">▶ Play</a>
+    <a href="/leaderboard" class="nl active">LEADERBOARD</a>
+    <a href="/stats" class="nl">MY STATS</a>
+    <a href="#" class="nl out" onclick="logout()">SIGN OUT</a>
+    <a href="/" class="nl play">▶ PLAY</a>
   </nav>
 </header>
 
@@ -205,7 +205,7 @@ async function loadUser(){
     if(user.isAdmin){
       const nav=document.querySelector('nav');
       const adminLink=document.createElement('a');
-      adminLink.href='/admin';adminLink.className='nl';adminLink.textContent='Admin';
+      adminLink.href='/admin';adminLink.className='nl';adminLink.textContent='ADMIN';
       nav.insertBefore(adminLink,document.querySelector('.nl.out'));
     }
   } else el.style.display='none';
