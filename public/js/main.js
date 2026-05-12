@@ -391,17 +391,17 @@ function update(dt){
 
     if(e.name==='Swamp Snail'&&!e.dying&&ed>0){
       e._trailT=(e._trailT||0)+dt;
-      if(e._trailT>0.45){
+      if(e._trailT>0.65){
         e._trailT=0;
-        snailTrails.push({x:e.x+(Math.random()-.5)*6,y:e.y+(Math.random()-.5)*6,r:10+Math.random()*4,life:8,maxLife:8,col:'120,40,180'});
+        snailTrails.push({x:e.x+(Math.random()-.5)*6,y:e.y+(Math.random()-.5)*6,r:10+Math.random()*4,life:4,maxLife:4,col:'160,60,220'});
       }
     }
 
     if(e.name==='Shambling Sheep'&&!e.dying&&ed>0){
       e._trailT=(e._trailT||0)+dt;
-      if(e._trailT>0.55){
+      if(e._trailT>0.75){
         e._trailT=0;
-        toxicClouds.push({x:e.x+(Math.random()-.5)*e.r*.6,y:e.y+(Math.random()-.5)*e.r*.6,r:0,maxR:18,life:7.0,maxLife:7.0,dmgT:0});
+        toxicClouds.push({x:e.x+(Math.random()-.5)*e.r*.6,y:e.y+(Math.random()-.5)*e.r*.6,r:0,maxR:18,life:4.0,maxLife:4.0,dmgT:0});
       }
     }
 

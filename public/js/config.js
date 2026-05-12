@@ -317,7 +317,7 @@ const ETYPES=[
   {name:'Cursed Crow',     r:8, hp:15, spd:46,dmg:8, xpV:1,xpC:1,col:'#2a1a4a',wave:1,cls:'B'},
   {name:'Plague Rat',      r:5, hp:10, spd:60,dmg:4, xpV:1,xpC:1,col:'#a89080',wave:1,cls:'B'},
   {name:'Shambling Sheep', r:15,hp:220,spd:22,dmg:18,xpV:3,xpC:4,col:'#c8d4cc',wave:2,cls:'C'},
-  {name:'Swamp Snail',     r:14,hp:240,spd:34,dmg:16,xpV:3,xpC:4,col:'#6a9a3a',wave:2,cls:'C'},
+  {name:'Swamp Snail',     r:14,hp:240,spd:28,dmg:16,xpV:3,xpC:4,col:'#f0b8d0',wave:2,cls:'C'},
   {name:'Ram Rusher',      r:14,hp:90, spd:24,dmg:20,xpV:3,xpC:1,col:'#8b7744',wave:3,cls:'D'},
   {name:'Funky Fox',       r:11,hp:140,spd:80,dmg:18,xpV:3,xpC:1,col:'#c85a1a',wave:3,cls:'D'},
   {name:'Skeletal Scarecrow',r:15,hp:480,spd:0, dmg:30,xpV:8,xpC:2,col:'#c8c4a0',wave:4,cls:'E'},

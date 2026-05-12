@@ -24,10 +24,10 @@ function killEnemy(e){
     e.hp=0;e.dying=true;e.dyingT=0.8;return;
   }
   if(e.name==='Swamp Snail'){
-    burst(e.x,e.y,'#44cc44',20);burst(e.x,e.y,'#88ff88',10);
+    burst(e.x,e.y,'#aa44ff',20);burst(e.x,e.y,'#dd88ff',10);
     for(let i=0;i<6;i++){
       const a=i/6*Math.PI*2,d=20+Math.random()*25;
-      snailTrails.push({x:e.x+Math.cos(a)*d,y:e.y+Math.sin(a)*d,r:22+Math.random()*10,life:8,maxLife:8});
+      snailTrails.push({x:e.x+Math.cos(a)*d,y:e.y+Math.sin(a)*d,r:22+Math.random()*10,life:8,maxLife:8,col:'160,60,220'});
     }
   }
   e.dead=true;kills++;

@@ -376,11 +376,11 @@ function drawEnemy(e){
 
   }else if(nm==='Swamp Snail'){
     const r=e.r;
-    // Slime body (elongated blob extending forward)
-    ctx.fillStyle='#6a9a3a';
+    // Body
+    ctx.fillStyle='#f0b8d0';
     ctx.beginPath();ctx.ellipse(r*.25,r*.15,r*1.1,r*.65,0.2,0,Math.PI*2);ctx.fill();
-    ctx.strokeStyle='#3a6a14';ctx.lineWidth=1.5;ctx.stroke();
-    // Shell (spiral coil on top)
+    ctx.strokeStyle='#c06090';ctx.lineWidth=1.5;ctx.stroke();
+    // Shell
     ctx.fillStyle='#8b6914';
     ctx.beginPath();ctx.arc(-r*.1,-r*.2,r*.72,0,Math.PI*2);ctx.fill();
     ctx.strokeStyle='#5a4008';ctx.lineWidth=2;ctx.stroke();
@@ -394,17 +394,17 @@ function drawEnemy(e){
     ctx.beginPath();ctx.arc(-r*.1,-r*.2,r*.5,Math.PI*.2,Math.PI*1.1);ctx.stroke();
     ctx.beginPath();ctx.arc(-r*.1,-r*.2,r*.3,Math.PI*.3,Math.PI*1.3);ctx.stroke();
     // Eye stalks
-    ctx.strokeStyle='#3a6a14';ctx.lineWidth=2;ctx.lineCap='round';
+    ctx.strokeStyle='#c06090';ctx.lineWidth=2;ctx.lineCap='round';
     ctx.beginPath();ctx.moveTo(r*.5,0);ctx.lineTo(r*.6,-r*.55);ctx.stroke();
     ctx.beginPath();ctx.moveTo(r*.72,r*.1);ctx.lineTo(r*.85,-r*.42);ctx.stroke();
     ctx.fillStyle='#1a0a2e';
     ctx.beginPath();ctx.arc(r*.6,-r*.55,3.2,0,Math.PI*2);ctx.fill();
     ctx.beginPath();ctx.arc(r*.85,-r*.42,3.2,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle='#88ff44';
+    ctx.fillStyle='#dd88ff';
     ctx.beginPath();ctx.arc(r*.6,-r*.55,1.5,0,Math.PI*2);ctx.fill();
     ctx.beginPath();ctx.arc(r*.85,-r*.42,1.5,0,Math.PI*2);ctx.fill();
-    // Slime sheen
-    ctx.fillStyle='rgba(150,255,80,.18)';
+    // Sheen
+    ctx.fillStyle='rgba(255,180,220,.2)';
     ctx.beginPath();ctx.ellipse(r*.3,r*.2,r*.9,r*.5,0.2,0,Math.PI*2);ctx.fill();
 
   }else if(nm==='Ram Rusher'){
