@@ -381,7 +381,7 @@ function update(dt){
       if(ed>0){
         e.wobbleT=(e.wobbleT||0)+dt;
         const px=-ey/ed,py=ex/ed;
-        const w=Math.sin(e.wobbleT*16)*2.4;
+        const w=Math.sin(e.wobbleT*10)*3.2;
         e.x+=(ex/ed+px*w)*e.spd*sm*dt;
         e.y+=(ey/ed+py*w)*e.spd*sm*dt;
       }
@@ -621,12 +621,6 @@ function startGame(){
   runPool=ETYPES.filter(t=>!t.cls);
   for(const cls in classes){const pool=classes[cls];runPool.push(pool[Math.floor(Math.random()*pool.length)]);}
   initPlayer();spawnChest();updateHUD();initAudio();
-  // DEBUG: force spawn test mobs
-  wave=4;
-  ['Shambling Sheep','Swamp Snail','Funky Fox'].forEach(name=>{
-    const t=ETYPES.find(e=>e.name===name);
-    if(t)spawnEnemyAt(t,pl.x+200+(Math.random()-.5)*80,pl.y+(Math.random()-.5)*80);
-  });
   Tone.Transport.stop();
   Tone.Transport.position=0;
   Tone.Transport.start();
