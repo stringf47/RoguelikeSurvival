@@ -381,7 +381,7 @@ function update(dt){
       if(ed>0){
         e.wobbleT=(e.wobbleT||0)+dt;
         const px=-ey/ed,py=ex/ed;
-        const w=Math.sin(e.wobbleT*5)*0.6;
+        const w=Math.sin(e.wobbleT*8)*1.1;
         e.x+=(ex/ed+px*w)*e.spd*sm*dt;
         e.y+=(ey/ed+py*w)*e.spd*sm*dt;
       }
@@ -391,21 +391,17 @@ function update(dt){
 
     if(e.name==='Swamp Snail'&&!e.dying&&ed>0){
       e._trailT=(e._trailT||0)+dt;
-      if(e._trailT>0.22){
+      if(e._trailT>0.45){
         e._trailT=0;
-        snailTrails.push({x:e.x+(Math.random()-.5)*8,y:e.y+(Math.random()-.5)*8,r:18+Math.random()*6,life:6,maxLife:6});
+        snailTrails.push({x:e.x+(Math.random()-.5)*6,y:e.y+(Math.random()-.5)*6,r:10+Math.random()*4,life:5,maxLife:5});
       }
     }
 
     if(e.name==='Shambling Sheep'&&!e.dying&&ed>0){
       e._trailT=(e._trailT||0)+dt;
-      if(e._trailT>0.14){
+      if(e._trailT>0.35){
         e._trailT=0;
-        const tr=3+Math.random()*3;
-        particles.push({x:e.x+(Math.random()-.5)*e.r*.8,y:e.y+(Math.random()-.5)*e.r*.8,
-          vx:(Math.random()-.5)*10,vy:(Math.random()-.5)*10,
-          life:0.5+Math.random()*0.3,maxLife:0.8,r:tr,col:'#44ff88'});
-        if(particles.length>MAX_PARTICLES)particles.length=MAX_PARTICLES;
+        toxicClouds.push({x:e.x+(Math.random()-.5)*e.r*.6,y:e.y+(Math.random()-.5)*e.r*.6,r:0,maxR:18,life:2.5,maxLife:2.5,dmgT:0});
       }
     }
 
