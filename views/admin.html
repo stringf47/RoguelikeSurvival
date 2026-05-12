@@ -204,12 +204,38 @@ td.date   { color:#aa3333; font-size:11px; letter-spacing:1px; }
 /* ── EMPTY / LOADING ── */
 .empty { text-align:center; padding:60px 20px; font-size:13px; letter-spacing:4px; color:#883333; }
 
+/* ── HAMBURGER ── */
+.hamburger {
+  display:none; background:none; border:1px solid #552222;
+  color:#cc1111; font-size:18px; padding:5px 12px; cursor:pointer;
+  line-height:1; border-radius:3px;
+  transition:border-color .2s, color .2s;
+}
+.hamburger:hover { border-color:#cc1111; color:#ff4433; }
+.mobile-menu {
+  display:none; position:absolute; top:56px; left:0; right:0;
+  background:#000; border-bottom:1px solid #2a0000;
+  z-index:50; flex-direction:column; padding:6px 0;
+}
+.mobile-menu.open { display:flex; }
+.mobile-menu .mn {
+  font-size:13px; letter-spacing:3px; color:#dd3333;
+  text-decoration:none; padding:13px 20px;
+  border-bottom:1px solid #160000;
+  transition:color .18s, background .18s;
+  text-transform:uppercase;
+}
+.mobile-menu .mn:last-child { border-bottom:none; }
+.mobile-menu .mn:hover  { color:#fff; background:#1a0000; }
+.mobile-menu .mn.active { color:#fff; }
+.mobile-menu .mn.play   { color:#ff4433; }
+.mobile-menu .mn-user   { font-size:12px; color:#ff4433; padding:12px 20px; border-bottom:1px solid #2a0000; letter-spacing:2px; }
+
 @media (max-width:700px) {
-  header { padding:0 16px; height:56px; }
-  .brand { font-size:14px; letter-spacing:4px; }
-  .nu    { display:none; }
-  .nl    { padding:6px 10px; font-size:11px; letter-spacing:1px; }
-  .nl.play { margin-left:4px; }
+  header { padding:0 16px; height:56px; position:relative; }
+  .brand { display:none; }
+  nav    { display:none; }
+  .hamburger { display:block; margin-left:auto; }
   .page-head  { padding:24px 16px 16px; }
   .page-title { font-size:22px; }
   .tabs-bar   { padding:0 16px 16px; }
@@ -233,7 +259,16 @@ td.date   { color:#aa3333; font-size:11px; letter-spacing:1px; }
     <a href="#" class="nl out" onclick="logout()">SIGN OUT</a>
     <a href="/" class="nl play">▶ PLAY</a>
   </nav>
+  <button class="hamburger" id="hamburger" onclick="toggleMenu()">☰</button>
 </header>
+<div class="mobile-menu" id="mobileMenu">
+  <div class="mn-user" id="mobileUser"></div>
+  <a href="/leaderboard" class="mn">LEADERBOARD</a>
+  <a href="/stats" class="mn">MY STATS</a>
+  <a href="/admin" class="mn active">ADMIN</a>
+  <a href="/" class="mn play">▶ PLAY</a>
+  <a href="#" class="mn" onclick="logout()">SIGN OUT</a>
+</div>
 
 <div class="page-head">
   <div class="page-title">
@@ -292,6 +327,14 @@ const fmt    = s => String(Math.floor(s/60)).padStart(2,'0')+':'+String(Math.flo
 const fmtDate= u => new Date(u*1000).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'2-digit'});
 const esc    = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
+function toggleMenu(){
+  document.getElementById('mobileMenu').classList.toggle('open');
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('header')&&!e.target.closest('.mobile-menu'))
+    document.getElementById('mobileMenu').classList.remove('open');
+});
+
 let allUsers  = [];
 let allScores = [];
 let resetTargetId = null;
@@ -299,7 +342,10 @@ let resetTargetId = null;
 /* ── INIT ── */
 async function init() {
   const { user } = await fetch('/api/auth/me').then(r => r.json());
-  if (user) document.getElementById('navUser').textContent = user.username;
+  if (user) {
+    document.getElementById('navUser').textContent = user.username;
+    document.getElementById('mobileUser').textContent = user.username;
+  }
   await Promise.all([loadUsers(), loadScores()]);
 }
 
