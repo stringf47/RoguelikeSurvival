@@ -174,8 +174,8 @@ function update(dt){
     if(s.type==='cc'){
       const iter=s.iteration||0;
       const numPts=Math.min(4,2+iter);
-      const fireInterval=Math.max(0.22,0.38-iter*0.02);
-      const orbitSpd=2.4+iter*0.3;
+      const fireInterval=Math.max(0.07,0.12-iter*0.01);
+      const orbitSpd=0.8+iter*0.15;
       const spd=130+iter*16;
       const dmg=10+iter*5;
       s.orbitAngle+=orbitSpd*dt;
@@ -588,7 +588,9 @@ function startGame(){
   runPool=ETYPES.filter(t=>!t.cls);
   for(const cls in classes){const pool=classes[cls];runPool.push(pool[Math.floor(Math.random()*pool.length)]);}
   initPlayer();spawnChest();updateHUD();initAudio();
-  if(Tone.Transport.state!=='started')Tone.Transport.start();
+  Tone.Transport.stop();
+  Tone.Transport.position=0;
+  Tone.Transport.start();
 }
 
 lastTS=performance.now();
