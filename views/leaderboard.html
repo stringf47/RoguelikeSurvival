@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leaderboard — BUTTERBALL'S LAST STAND</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background:#0d0000;
+  font-family:'Georgia',serif;
+  min-height:100vh; display:flex; flex-direction:column;
+  color:#fff;
+}
+
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(18px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes glow {
+  0%,100% { filter:drop-shadow(0 0 10px #cc1111) drop-shadow(0 0 28px #880000); }
+  50%      { filter:drop-shadow(0 0 18px #ff2222) drop-shadow(0 0 44px #cc0000); }
+}
+
+/* ── HEADER ── */
+header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 60px; height:70px;
+  background:#000;
+  border-bottom:1px solid #2a0000;
+  position:sticky; top:0; z-index:10; flex-shrink:0;
+  contain:paint;
+}
+.brand {
+  font-size:22px; letter-spacing:8px; color:#cc1111;
+  animation:glow 4s ease-in-out infinite;
+  will-change:filter; transform:translateZ(0);
+  white-space:nowrap;
+}
+nav { display:flex; align-items:center; gap:2px; }
+.nu {
+  font-size:13px; color:#ff4433;
+  padding-right:20px; margin-right:8px;
+  border-right:1px solid #2a0000;
+  white-space:nowrap;
+}
+.nl {
+  font-size:13px; color:#dd3333; text-decoration:none;
+  padding:8px 18px; white-space:nowrap;
+  transition:color .2s, background .2s;
+  border-radius:3px;
+}
+.nl:hover        { color:#fff; background:#1a0000; }
+.nl.active       { color:#fff; }
+.nl.active::after { content:''; display:block; height:2px; background:#cc1111; margin-top:2px; }
+.nl.play         { background:#cc1111; color:#fff; margin-left:8px; }
+.nl.play:hover   { background:#e01212; }
+.nl.out:hover    { color:#ff4433; }
+
+/* ── PAGE HEADER ── */
+.page-head {
+  padding:40px 60px 28px;
+  display:flex; align-items:flex-end; justify-content:space-between;
+  animation:fadeUp .3s ease both;
+}
+.page-title {
+  font-size:32px; letter-spacing:4px; color:#fff;
+  line-height:1;
+}
+.page-title span { display:block; font-size:13px; letter-spacing:3px; color:#cc3333; margin-top:6px; }
+.page-meta { font-size:14px; color:#cc3333; letter-spacing:1px; }
+.page-meta strong { color:#ff6644; font-size:22px; }
+
+/* ── FILTER PILLS ── */
+.filters {
+  display:flex; gap:8px;
+  padding:0 60px 24px;
+  animation:fadeUp .32s .04s ease both;
+}
+.fp {
+  font-family:inherit; font-size:13px; letter-spacing:1px;
+  padding:8px 22px; border:1px solid #5a0000; background:transparent;
+  color:#ee4444; cursor:pointer; border-radius:3px;
+  transition:all .18s;
+}
+.fp:hover  { border-color:#aa1111; color:#ff6644; background:#160000; }
+.fp.active { border-color:#cc1111; background:#cc1111; color:#fff; }
+
+/* ── TABLE ── */
+.tbox {
+  margin:0 60px 60px;
+  border:1px solid #2a0000;
+  border-radius:4px;
+  overflow:hidden;
+  animation:fadeUp .34s .08s ease both;
+}
+
+table { width:100%; border-collapse:collapse; }
+
+thead tr { background:#080000; border-bottom:1px solid #2a0000; }
+th {
+  padding:13px 20px; text-align:left;
+  font-size:11px; letter-spacing:3px; color:#cc3333;
+  font-weight:normal; text-transform:uppercase; white-space:nowrap;
+}
+th.r { text-align:right; }
+
+tbody tr {
+  border-bottom:1px solid #1a0000;
+  transition:background .14s;
+  cursor:default;
+}
+tbody tr:last-child { border-bottom:none; }
+tbody tr:hover { background:#1a0000; }
+
+td { padding:18px 20px; vertical-align:middle; }
+
+td.rank {
+  width:60px;
+  font-size:14px; color:#883333;
+  font-variant-numeric:tabular-nums;
+}
+td.name {
+  font-size:17px; color:#fff;
+  max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+td.time {
+  font-size:16px; color:#ff6644;
+  font-variant-numeric:tabular-nums; letter-spacing:1px;
+}
+td.num  { text-align:right; font-size:14px; color:#ee4444; }
+td.win  { text-align:center; font-size:18px; color:#cc8833; }
+td.date { font-size:12px; color:#aa3333; letter-spacing:1px; }
+
+/* top 3 */
+tr.gold   td.rank { color:#cc8833; font-size:18px; font-style:italic; }
+tr.silver td.rank { color:#c0c0c0; font-size:18px; font-style:italic; }
+tr.bronze td.rank { color:#b07040; font-size:18px; font-style:italic; }
+tr.gold   { background:#0d0800; }
+tr.silver { background:#080808; }
+tr.bronze { background:#0a0500; }
+tr.gold:hover   { background:#160e00; }
+tr.silver:hover { background:#111111; }
+tr.bronze:hover { background:#140900; }
+
+/* your row */
+tr.you {
+  background:#1a0000;
+  box-shadow:inset 3px 0 0 #cc1111;
+}
+tr.you td.rank { color:#cc1111; }
+tr.you td.name { color:#ff6644; }
+tr.you td.time { color:#ffaa44; }
+tr.you td.num  { color:#ff6644; }
+tr.you:hover   { background:#220000; }
+
+/* ── EMPTY ── */
+.empty { text-align:center; padding:80px 20px; font-size:13px; letter-spacing:4px; color:#883333; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">BUTTERBALL'S LAST STAND</div>
+  <nav>
+    <div class="nu" id="navUser"></div>
+    <a href="/leaderboard" class="nl active">Leaderboard</a>
+    <a href="/stats" class="nl">My Stats</a>
+    <a href="#" class="nl out" onclick="logout()">Sign Out</a>
+    <a href="/" class="nl play">▶ Play</a>
+  </nav>
+</header>
+
+<div class="page-head">
+  <div class="page-title">
+    Leaderboard
+    <span>Hall of Survivors</span>
+  </div>
+  <div class="page-meta" id="meta"></div>
+</div>
+
+<div class="filters">
+  <button class="fp active" id="btnAll"  onclick="setFilter('all')">All Runs</button>
+  <button class="fp"        id="btnWins" onclick="setFilter('wins')">Wins Only</button>
+</div>
+
+<div class="tbox">
+  <div id="root"><div class="empty">LOADING · · ·</div></div>
+</div>
+
+<script>
+let filter='all';
+const fmt    =s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(Math.floor(s%60)).padStart(2,'0');
+const fmtNum =n=>n>=1000?(n/1000).toFixed(1)+'k':n;
+const fmtDate=u=>new Date(u*1000).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'2-digit'});
+const esc    =s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const rnkCls =r=>r===1?'gold':r===2?'silver':r===3?'bronze':'';
+
+async function loadUser(){
+  const {user}=await fetch('/api/auth/me').then(r=>r.json());
+  const el=document.getElementById('navUser');
+  if(user){
+    el.textContent=user.username;
+    if(user.isAdmin){
+      const nav=document.querySelector('nav');
+      const adminLink=document.createElement('a');
+      adminLink.href='/admin';adminLink.className='nl';adminLink.textContent='Admin';
+      nav.insertBefore(adminLink,document.querySelector('.nl.out'));
+    }
+  } else el.style.display='none';
+}
+
+async function load(){
+  document.getElementById('root').innerHTML='<div class="empty">LOADING · · ·</div>';
+  const {rows,total}=await fetch('/api/scores/leaderboard'+(filter==='wins'?'?filter=wins':'')).then(r=>r.json());
+  document.getElementById('meta').innerHTML=
+    `<strong>${total}</strong> ${filter==='wins'?'victories':'runs on record'}`;
+
+  if(!rows.length){
+    document.getElementById('root').innerHTML='<div class="empty">No runs yet — be the first.</div>';
+    return;
+  }
+  document.getElementById('root').innerHTML=`
+    <table>
+      <thead><tr>
+        <th>#</th><th>Name</th><th>Time</th>
+        <th class="r">Kills</th><th class="r">Lvl</th>
+        <th class="r">Damage</th><th class="r">DPS</th>
+        <th>Win</th><th>Date</th>
+      </tr></thead>
+      <tbody>${rows.map(r=>`
+        <tr class="${r.isYou?'you ':''}${rnkCls(r.rank)}">
+          <td class="rank">${r.rank<=3?['①','②','③'][r.rank-1]:'#'+r.rank}</td>
+          <td class="name">${r.isYou?'▶ ':''}${esc(r.username)}</td>
+          <td class="time">${fmt(r.time)}</td>
+          <td class="num">${r.kills}</td>
+          <td class="num">${r.level}</td>
+          <td class="num">${fmtNum(r.damage)}</td>
+          <td class="num">${r.dps}</td>
+          <td class="win">${r.won?'✦':''}</td>
+          <td class="date">${fmtDate(r.created_at)}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+function setFilter(f){
+  filter=f;
+  document.getElementById('btnAll').classList.toggle('active',f==='all');
+  document.getElementById('btnWins').classList.toggle('active',f==='wins');
+  load();
+}
+async function logout(){ await fetch('/api/auth/logout',{method:'POST'}); location.href='/login'; }
+loadUser(); load();
+</script>
+</body>
+</html>

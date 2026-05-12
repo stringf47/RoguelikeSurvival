@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>BUTTERBALL'S LAST STAND</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; overflow:hidden; }
+
+body {
+  background:#000;
+  font-family:'Georgia',serif;
+  display:flex;
+}
+
+@keyframes glow {
+  0%,100% { filter: drop-shadow(0 0 12px #cc1111) drop-shadow(0 0 30px #880000); }
+  50%      { filter: drop-shadow(0 0 22px #ff2222) drop-shadow(0 0 50px #cc0000); }
+}
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(20px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes slideIn {
+  from { opacity:0; transform:translateY(6px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes shake {
+  0%,100% { transform:translateX(0); }
+  20%     { transform:translateX(-9px); }
+  40%     { transform:translateX(9px); }
+  60%     { transform:translateX(-5px); }
+  80%     { transform:translateX(5px); }
+}
+
+/* ── LEFT HERO PANEL ── */
+.hero {
+  flex: 0 0 66.666%;
+  height:100%;
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  contain: paint;
+  will-change: transform;
+}
+.hero-bg {
+  position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 35%, rgba(160,0,0,.26) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 40% at 15% 80%, rgba(100,0,0,.14) 0%, transparent 55%),
+    radial-gradient(ellipse 30% 50% at 85% 10%, rgba(80,0,0,.10) 0%, transparent 55%);
+}
+.hero-border {
+  position:absolute; top:0; right:0; width:1px; height:100%;
+  background:linear-gradient(180deg, transparent, #440000 20%, #660000 50%, #440000 80%, transparent);
+}
+.hero-inner {
+  position:relative; z-index:1; text-align:center;
+  animation: fadeUp .6s cubic-bezier(.22,.68,0,1.2) both;
+  pointer-events:none;
+}
+.hero-title {
+  font-size:68px; letter-spacing:12px; color:#cc1111; line-height:1;
+  animation: glow 4s ease-in-out infinite;
+  will-change: filter;
+  transform: translateZ(0);
+}
+.hero-title-sub {
+  font-size:32px; letter-spacing:14px; color:#ff2222;
+  margin-top:6px;
+  text-shadow:0 0 18px #cc111166;
+}
+.hero-rule {
+  width:240px; height:1px; margin:28px auto;
+  background:linear-gradient(90deg, transparent, #cc1111, transparent);
+  opacity:.55;
+}
+.hero-tagline {
+  font-size:15px; letter-spacing:3px; color:#ff6644;
+  line-height:2.0;
+}
+.hero-sub {
+  font-size:11px; letter-spacing:4px; color:#cc3333;
+  margin-top:20px; text-transform:uppercase;
+}
+.hero-runes {
+  font-size:22px; color:#882222; letter-spacing:18px;
+  margin-top:36px; display:block;
+}
+
+/* ── RIGHT FORM PANEL ── */
+.panel {
+  flex: 0 0 33.333%;
+  height:100%;
+  overflow-y:auto;
+  background:#060000;
+  border-left:1px solid #330000;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:52px 44px;
+  animation: fadeUp .45s .08s cubic-bezier(.22,.68,0,1.2) both;
+}
+.panel.shake { animation: shake .35s ease both; }
+
+/* ── TABS ── */
+.tabs {
+  display:flex;
+  border:1px solid #2a0000;
+  margin-bottom:28px;
+}
+.tab {
+  flex:1; padding:11px 0; text-align:center;
+  font-family:inherit; font-size:12px; letter-spacing:3px; text-transform:uppercase;
+  background:none; border:none; color:#aa3333;
+  cursor:pointer; position:relative;
+  transition:color .2s, background .2s;
+}
+.tab + .tab { border-left:1px solid #2a0000; }
+.tab:hover  { color:#cc3333; background:rgba(80,0,0,.15); }
+.tab.active { color:#ffffff; background:rgba(204,17,17,.15); }
+
+/* ── FIELDS ── */
+.form { display:none; }
+.form.active { display:block; animation: slideIn .2s ease both; }
+
+.field { margin-bottom:18px; }
+.field label {
+  display:block; font-size:11px; letter-spacing:3px; color:#ffffff;
+  margin-bottom:7px; text-transform:uppercase; opacity:.75;
+}
+.field input {
+  width:100%; padding:12px 14px;
+  background:#0a0000; border:1px solid #3a0000;
+  color:#ffffff; font-family:inherit; font-size:15px;
+  outline:none;
+  transition:border-color .2s, box-shadow .2s;
+}
+.field input::placeholder { color:#773333; }
+.field input:focus {
+  border-color:#cc1111;
+  box-shadow:0 0 0 3px rgba(204,17,17,.1);
+}
+.field-pw { position:relative; }
+.field-pw input { padding-right:52px; }
+.pw-toggle {
+  position:absolute; right:0; top:0; height:100%; width:46px;
+  background:none; border:none; border-left:1px solid #3a0000;
+  color:#aa3333; cursor:pointer; font-family:inherit;
+  font-size:10px; letter-spacing:2px; text-transform:uppercase;
+  transition:color .18s, background .18s;
+}
+.pw-toggle:hover { color:#ff4433; background:rgba(80,0,0,.15); }
+
+/* ── BUTTONS ── */
+.btn-primary {
+  width:100%; padding:13px;
+  background:#cc1111; color:#ffffff; border:none;
+  font-family:inherit; font-size:14px; letter-spacing:4px; text-transform:uppercase;
+  cursor:pointer; margin-top:8px;
+  transition:background .18s, box-shadow .18s, transform .1s;
+}
+.btn-primary:hover { background:#e01212; box-shadow:0 4px 28px rgba(204,17,17,.45); }
+.btn-primary:active { transform:scale(.98); }
+
+.or-row {
+  display:flex; align-items:center; gap:14px;
+  margin:22px 0;
+  font-size:11px; letter-spacing:2px; color:#aa3333;
+}
+.or-row::before, .or-row::after { content:''; flex:1; height:1px; background:#2a0000; }
+
+.btn-guest {
+  width:100%; padding:12px;
+  background:transparent; color:#cc8833;
+  border:1px solid #7a5000;
+  font-family:inherit; font-size:13px; letter-spacing:3px; text-transform:uppercase;
+  cursor:pointer;
+  transition:background .18s, border-color .18s, box-shadow .18s, transform .1s;
+}
+.btn-guest:hover {
+  background:#0a0600; border-color:#cc8833;
+  box-shadow:0 0 22px rgba(204,136,51,.25);
+}
+.btn-guest:active { transform:scale(.98); }
+
+/* ── FEEDBACK ── */
+.msg {
+  display:none; text-align:center;
+  padding:10px 14px; margin-top:14px;
+  font-size:12px; letter-spacing:1px;
+  animation: slideIn .18s ease both;
+}
+.msg.error   { color:#ff4444; background:rgba(180,0,0,.15); border:1px solid #660000; }
+.msg.success { color:#44ee88; background:rgba(0,100,50,.12); border:1px solid #005533; }
+.msg.show    { display:block; }
+
+.note {
+  text-align:center; margin-top:26px;
+  font-size:11px; letter-spacing:2px; color:#ee4444;
+  text-transform:uppercase;
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-border"></div>
+  <div class="hero-inner">
+    <div class="hero-title">BUTTERBALL'S</div>
+    <div class="hero-title-sub">LAST STAND</div>
+    <div class="hero-rule"></div>
+    <div class="hero-tagline">Protect the flock.<br>Hold until dawn.<br>Survive 10 minutes.</div>
+    <div class="hero-sub">Claim your place in history</div>
+    <span class="hero-runes">✦ ✦ ✦</span>
+  </div>
+</div>
+
+<div class="panel" id="panel">
+  <div class="tabs">
+    <button class="tab"        id="tabLogin"    onclick="switchTab('login')">Sign In</button>
+    <button class="tab active" id="tabRegister" onclick="switchTab('register')">Register</button>
+  </div>
+
+  <div class="form" id="formLogin">
+    <div class="field">
+      <label>Username</label>
+      <input type="text" id="loginUser" placeholder="your username" autocomplete="username"/>
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <div class="field-pw">
+        <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password"/>
+        <button type="button" class="pw-toggle" onclick="togglePw('loginPass',this)" tabindex="-1">SHOW</button>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="doLogin()">Enter the Stand</button>
+  </div>
+
+  <div class="form active" id="formRegister">
+    <div class="field">
+      <label>Username</label>
+      <input type="text" id="regUser" placeholder="3–24 characters" autocomplete="username"/>
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <div class="field-pw">
+        <input type="password" id="regPass" placeholder="at least 6 characters" autocomplete="new-password"/>
+        <button type="button" class="pw-toggle" onclick="togglePw('regPass',this)" tabindex="-1">SHOW</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Confirm Password</label>
+      <div class="field-pw">
+        <input type="password" id="regPass2" placeholder="••••••••" autocomplete="new-password"/>
+        <button type="button" class="pw-toggle" onclick="togglePw('regPass2',this)" tabindex="-1">SHOW</button>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="doRegister()">Join the Flock</button>
+  </div>
+
+  <div class="msg" id="msg"></div>
+
+  <div class="or-row">or</div>
+  <button class="btn-guest" onclick="doGuest()">⚔ &nbsp;Play as Guest</button>
+  <div class="note">✦ &nbsp;Scores saved for all players &nbsp;✦</div>
+</div>
+
+<script>
+function togglePw(id, btn) {
+  const input = document.getElementById(id);
+  const show = input.type === 'password';
+  input.type = show ? 'text' : 'password';
+  btn.textContent = show ? 'HIDE' : 'SHOW';
+}
+function switchTab(t) {
+  document.getElementById('formLogin').classList.toggle('active', t==='login');
+  document.getElementById('formRegister').classList.toggle('active', t==='register');
+  document.getElementById('tabLogin').classList.toggle('active', t==='login');
+  document.getElementById('tabRegister').classList.toggle('active', t==='register');
+  clearMsg();
+}
+function showMsg(text, type) {
+  const el = document.getElementById('msg');
+  el.textContent = text; el.className = `msg ${type} show`;
+  if (type==='error') {
+    const p = document.getElementById('panel');
+    p.classList.remove('shake'); void p.offsetWidth; p.classList.add('shake');
+  }
+}
+function clearMsg() { document.getElementById('msg').className='msg'; }
+async function post(url, body) {
+  const r = await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  return { ok:r.ok, data:await r.json() };
+}
+async function doLogin() {
+  const username=document.getElementById('loginUser').value.trim();
+  const password=document.getElementById('loginPass').value;
+  if (!username||!password) return showMsg('Fill in all fields','error');
+  const {ok,data}=await post('/api/auth/login',{username,password});
+  if (!ok) return showMsg(data.error,'error');
+  showMsg('Welcome back, '+data.username,'success');
+  setTimeout(()=>location.href='/',600);
+}
+async function doRegister() {
+  const username=document.getElementById('regUser').value.trim();
+  const password=document.getElementById('regPass').value;
+  const pass2=document.getElementById('regPass2').value;
+  if (!username||!password||!pass2) return showMsg('Fill in all fields','error');
+  if (password!==pass2) return showMsg('Passwords do not match','error');
+  const {ok,data}=await post('/api/auth/register',{username,password});
+  if (!ok) return showMsg(data.error,'error');
+  showMsg('Welcome, '+data.username+' — to arms!','success');
+  setTimeout(()=>location.href='/',600);
+}
+async function doGuest() {
+  const {ok,data}=await post('/api/auth/guest',{});
+  if (!ok) return showMsg('Could not create guest session','error');
+  showMsg('Playing as '+data.username,'success');
+  setTimeout(()=>location.href='/',600);
+}
+document.addEventListener('keydown', e => {
+  if (e.key!=='Enter') return;
+  document.getElementById('formRegister').classList.contains('active') ? doRegister() : doLogin();
+});
+</script>
+</body>
+</html>

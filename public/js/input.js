@@ -56,25 +56,27 @@ canvas.addEventListener('pointercancel',e=>{ if(e.pointerId===joystick.id)resetJ
 document.addEventListener('visibilitychange',()=>{ if(document.hidden)resetJoystick(); });
 
 window.addEventListener('keydown',e=>{
+  const k=e.key.toLowerCase();
   if(state==='levelup'){
-    if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A'){selectedCardIdx=(selectedCardIdx-1+currentChoices.length)%currentChoices.length;syncCardSelection();e.preventDefault();return;}
-    if(e.key==='ArrowRight'||e.key==='d'||e.key==='D'){selectedCardIdx=(selectedCardIdx+1)%currentChoices.length;syncCardSelection();e.preventDefault();return;}
-    if(e.key===' '||e.key==='Enter'){pickUpgrade(currentChoices[selectedCardIdx]);e.preventDefault();return;}
+    if(k==='arrowleft'||k==='a'){selectedCardIdx=(selectedCardIdx-1+currentChoices.length)%currentChoices.length;syncCardSelection();e.preventDefault();return;}
+    if(k==='arrowright'||k==='d'){selectedCardIdx=(selectedCardIdx+1)%currentChoices.length;syncCardSelection();e.preventDefault();return;}
+    if(k===' '||k==='enter'){pickUpgrade(currentChoices[selectedCardIdx]);e.preventDefault();return;}
   }
-  if(e.key==='Escape'&&state==='playing'){paused=!paused;document.getElementById('pauseBanner').style.display=paused?'block':'none';}
-  keys[e.key]=true;
-  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();
+  if(k==='escape'&&state==='playing'){togglePause();e.preventDefault();return;}
+  keys[k]=true;
+  if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();
 });
 
-window.addEventListener('keyup',e=>{keys[e.key]=false;});
+window.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
 window.addEventListener('blur',()=>{for(const k in keys)keys[k]=false;resetJoystick();});
+window.addEventListener('focus',()=>{for(const k in keys)keys[k]=false;});
 
 function getDir(){
   let dx=0,dy=0;
-  if(keys['ArrowLeft']||keys['a']||keys['A'])dx-=1;
-  if(keys['ArrowRight']||keys['d']||keys['D'])dx+=1;
-  if(keys['ArrowUp']||keys['w']||keys['W'])dy-=1;
-  if(keys['ArrowDown']||keys['s']||keys['S'])dy+=1;
+  if(keys['arrowleft']||keys['a'])dx-=1;
+  if(keys['arrowright']||keys['d'])dx+=1;
+  if(keys['arrowup']||keys['w'])dy-=1;
+  if(keys['arrowdown']||keys['s'])dy+=1;
   dx+=joystick.dx;dy+=joystick.dy;
   if(dx||dy){
     const l=Math.hypot(dx,dy);dx/=l;dy/=l;

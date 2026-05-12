@@ -86,6 +86,7 @@ function triggerDeath(){
   document.getElementById('goDmg').textContent='Total Damage: '+(totalDmg>=1000?(totalDmg/1000).toFixed(1)+'k':totalDmg);
   document.getElementById('goXp').textContent='XP Collected: '+totalXp;
   document.getElementById('goDps').textContent='Avg DPS: '+Math.floor(totalDmg/gameTime);
+  submitScore(false).then(data=>renderEndLeaderboard('go',data));
 }
 
 function checkPlayerDeath(){
@@ -138,6 +139,7 @@ function update(dt){
     document.getElementById('winDmg').textContent='Total Damage: '+(totalDmg>=1000?(totalDmg/1000).toFixed(1)+'k':totalDmg);
     document.getElementById('winXp').textContent='XP Collected: '+totalXp;
     document.getElementById('winDps').textContent='Avg DPS: '+Math.floor(totalDmg/gameTime);
+    submitScore(true).then(data=>renderEndLeaderboard('win',data));
     return;
   }
 
@@ -285,11 +287,11 @@ function update(dt){
   spawnT+=dt;
   const spawnRate=Math.max(1.0,2.8-gameTime/200);
   const batchSize=Math.min(2,1+Math.floor(gameTime/240));
-  if(enemies.length>75){
+  if(enemies.length>50){
     enemies.sort((a,b)=>Math.hypot(b.x-pl.x,b.y-pl.y)-Math.hypot(a.x-pl.x,a.y-pl.y));
-    enemies.splice(0,enemies.length-75);
+    enemies.splice(0,enemies.length-50);
   }
-  if(spawnT>=spawnRate&&enemies.length<75){spawnT-=spawnRate;for(let i=0;i<batchSize;i++)spawnEnemy();}
+  if(spawnT>=spawnRate&&enemies.length<50){spawnT-=spawnRate;for(let i=0;i<batchSize;i++)spawnEnemy();}
 
   for(const w of pl.weapons) WDEFS[w.type].fire(w,dt);
 

@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Stats — BUTTERBALL'S LAST STAND</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background:#0d0000;
+  font-family:'Georgia',serif;
+  min-height:100vh; display:flex; flex-direction:column;
+  color:#fff;
+}
+
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(18px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes cardIn {
+  from { opacity:0; transform:translateY(12px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes glow {
+  0%,100% { filter:drop-shadow(0 0 10px #cc1111) drop-shadow(0 0 28px #880000); }
+  50%      { filter:drop-shadow(0 0 18px #ff2222) drop-shadow(0 0 44px #cc0000); }
+}
+
+/* ── HEADER ── */
+header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 60px; height:70px;
+  background:#000;
+  border-bottom:1px solid #2a0000;
+  position:sticky; top:0; z-index:10; flex-shrink:0;
+  contain:paint;
+}
+.brand {
+  font-size:22px; letter-spacing:8px; color:#cc1111;
+  animation:glow 4s ease-in-out infinite;
+  will-change:filter; transform:translateZ(0);
+  white-space:nowrap;
+}
+nav { display:flex; align-items:center; gap:2px; }
+.nu {
+  font-size:13px; color:#ff4433;
+  padding-right:20px; margin-right:8px;
+  border-right:1px solid #2a0000;
+  white-space:nowrap;
+}
+.nl {
+  font-size:13px; color:#dd3333; text-decoration:none;
+  padding:8px 18px; white-space:nowrap;
+  transition:color .2s, background .2s;
+  border-radius:3px;
+}
+.nl:hover        { color:#fff; background:#1a0000; }
+.nl.active       { color:#fff; }
+.nl.active::after { content:''; display:block; height:2px; background:#cc1111; margin-top:2px; }
+.nl.play         { background:#cc1111; color:#fff; margin-left:8px; }
+.nl.play:hover   { background:#e01212; }
+.nl.out:hover    { color:#ff4433; }
+
+/* ── PAGE HEADER ── */
+.page-head {
+  padding:40px 60px 32px;
+  animation:fadeUp .3s ease both;
+}
+.page-title {
+  font-size:32px; letter-spacing:4px; color:#fff; line-height:1;
+}
+.page-title span { display:block; font-size:13px; letter-spacing:3px; color:#cc3333; margin-top:6px; }
+
+/* ── STAT CARDS ── */
+.cards {
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:1px;
+  background:#2a0000;
+  border:1px solid #2a0000;
+  border-radius:4px;
+  margin:0 60px 40px;
+  overflow:hidden;
+  animation:fadeUp .32s .04s ease both;
+}
+.sc {
+  background:#080000;
+  padding:28px 24px 24px;
+  animation:cardIn .4s cubic-bezier(.22,.68,0,1.2) both;
+  transition:background .18s;
+  position:relative;
+}
+.sc::after {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background:transparent; transition:background .18s;
+}
+.sc:hover { background:#110000; }
+.sc:hover::after { background:#cc1111; }
+.sc:nth-child(1){animation-delay:.04s}
+.sc:nth-child(2){animation-delay:.09s}
+.sc:nth-child(3){animation-delay:.13s}
+.sc:nth-child(4){animation-delay:.17s}
+.sc:nth-child(5){animation-delay:.21s}
+.sc:nth-child(6){animation-delay:.25s}
+
+.sc-label { font-size:10px; letter-spacing:3px; color:#cc3333; text-transform:uppercase; margin-bottom:16px; }
+.sc-val   { font-size:44px; color:#fff; line-height:1; font-variant-numeric:tabular-nums; }
+.sc-val.amber { color:#cc8833; }
+.sc-unit  { font-size:20px; color:#aa3333; }
+.sc-sub   { font-size:12px; color:#cc3333; margin-top:10px; letter-spacing:1px; }
+
+/* ── SECTION ── */
+.section-head {
+  display:flex; align-items:baseline; justify-content:space-between;
+  padding:0 60px 16px;
+  animation:fadeUp .34s .08s ease both;
+}
+.section-title { font-size:20px; letter-spacing:3px; color:#fff; }
+.section-meta  { font-size:13px; color:#cc3333; }
+.section-meta strong { color:#ff6644; }
+
+/* ── TABLE ── */
+.tbox {
+  margin:0 60px 60px;
+  border:1px solid #2a0000;
+  border-radius:4px;
+  overflow:hidden;
+  animation:fadeUp .36s .12s ease both;
+}
+
+table { width:100%; border-collapse:collapse; }
+
+thead tr { background:#080000; border-bottom:1px solid #2a0000; }
+th {
+  padding:13px 20px; text-align:left;
+  font-size:11px; letter-spacing:3px; color:#cc3333;
+  font-weight:normal; text-transform:uppercase; white-space:nowrap;
+}
+th.r { text-align:right; }
+
+tbody tr {
+  border-bottom:1px solid #1a0000;
+  transition:background .14s; cursor:default;
+}
+tbody tr:last-child { border-bottom:none; }
+tbody tr:hover { background:#1a0000; }
+
+td { padding:18px 20px; vertical-align:middle; }
+td.time { font-size:18px; color:#ff6644; font-variant-numeric:tabular-nums; letter-spacing:1px; }
+td.num  { text-align:right; font-size:14px; color:#ee4444; }
+td.win  { text-align:center; font-size:18px; color:#cc8833; }
+td.pb   { text-align:center; font-size:12px; letter-spacing:2px; color:#cc8833; white-space:nowrap; }
+td.date { font-size:12px; color:#aa3333; letter-spacing:1px; }
+
+tr.best { background:#120800; box-shadow:inset 3px 0 0 #cc8833; }
+tr.best td.time { color:#ffcc44; }
+tr.best:hover   { background:#1a0e00; }
+
+/* ── EMPTY ── */
+.empty { text-align:center; padding:80px 20px; font-size:13px; letter-spacing:4px; color:#883333; }
+.empty a { color:#cc3333; text-decoration:none; }
+.empty a:hover { color:#ff4433; }
+
+/* ── SETTINGS ── */
+.settings-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:1px;
+  background:#2a0000; border:1px solid #2a0000; border-radius:4px;
+  margin:0 60px 60px; overflow:hidden;
+  animation:fadeUp .38s .16s ease both;
+}
+.settings-panel { background:#080000; padding:28px 32px; }
+.settings-title { font-size:11px; letter-spacing:3px; color:#cc3333; text-transform:uppercase; margin-bottom:20px; }
+.sf { margin-bottom:14px; }
+.sf label { display:block; font-size:11px; letter-spacing:3px; color:#fff; opacity:.75; margin-bottom:6px; text-transform:uppercase; }
+.sf-pw { position:relative; }
+.sf-pw input { padding-right:52px; }
+.sf input {
+  width:100%; padding:11px 14px;
+  background:#0a0000; border:1px solid #3a0000; color:#fff;
+  font-family:inherit; font-size:14px; outline:none;
+  transition:border-color .2s, box-shadow .2s;
+}
+.sf input::placeholder { color:#773333; }
+.sf input:focus { border-color:#cc1111; box-shadow:0 0 0 3px rgba(204,17,17,.1); }
+.sf-pw-btn {
+  position:absolute; right:0; top:0; height:100%; width:46px;
+  background:none; border:none; border-left:1px solid #3a0000;
+  color:#aa3333; cursor:pointer; font-family:inherit;
+  font-size:10px; letter-spacing:2px; text-transform:uppercase;
+  transition:color .18s, background .18s;
+}
+.sf-pw-btn:hover { color:#ff4433; background:rgba(80,0,0,.15); }
+.settings-btn {
+  padding:11px 28px; background:#cc1111; color:#fff; border:none;
+  font-family:inherit; font-size:12px; letter-spacing:4px; text-transform:uppercase;
+  cursor:pointer; margin-top:6px;
+  transition:background .18s, box-shadow .18s, transform .1s;
+}
+.settings-btn:hover { background:#e01212; box-shadow:0 4px 22px rgba(204,17,17,.4); }
+.settings-btn:active { transform:scale(.97); }
+.settings-msg {
+  display:none; font-size:11px; letter-spacing:1px; margin-top:12px;
+  padding:8px 12px;
+}
+.settings-msg.error   { color:#ff4444; background:rgba(180,0,0,.15); border:1px solid #660000; }
+.settings-msg.success { color:#44ee88; background:rgba(0,100,50,.12); border:1px solid #005533; }
+.settings-msg.show    { display:block; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">BUTTERBALL'S LAST STAND</div>
+  <nav>
+    <div class="nu" id="navUser"></div>
+    <a href="/leaderboard" class="nl">Leaderboard</a>
+    <a href="/stats" class="nl active">My Stats</a>
+    <a href="#" class="nl out" onclick="logout()">Sign Out</a>
+    <a href="/" class="nl play">▶ Play</a>
+  </nav>
+</header>
+
+<div class="page-head">
+  <div class="page-title">
+    My Stats
+    <span id="pageSubtitle">loading...</span>
+  </div>
+</div>
+
+<div id="cards" class="cards" style="display:none"></div>
+
+<div class="section-head" id="sectionHead" style="display:none">
+  <div class="section-title">Run History</div>
+  <div class="section-meta" id="runCount"></div>
+</div>
+
+<div class="tbox" id="tbox" style="display:none">
+  <div id="root"><div class="empty">LOADING · · ·</div></div>
+</div>
+
+<div id="emptyState"></div>
+
+<div class="section-head" style="animation-delay:.14s">
+  <div class="section-title">Account Settings</div>
+</div>
+
+<div class="settings-grid" id="settingsGrid" style="display:none">
+  <!-- Change Username -->
+  <div class="settings-panel">
+    <div class="settings-title">Change Username</div>
+    <div class="sf">
+      <label>New Username</label>
+      <input type="text" id="newUsername" placeholder="3–24 characters" autocomplete="off"/>
+    </div>
+    <button class="settings-btn" onclick="doChangeUsername()">Update Username</button>
+    <div class="settings-msg" id="unMsg"></div>
+  </div>
+  <!-- Change Password -->
+  <div class="settings-panel">
+    <div class="settings-title">Change Password</div>
+    <div class="sf">
+      <label>Current Password</label>
+      <div class="sf-pw">
+        <input type="password" id="curPass" placeholder="••••••••"/>
+        <button type="button" class="sf-pw-btn" onclick="sfTogglePw('curPass',this)" tabindex="-1">SHOW</button>
+      </div>
+    </div>
+    <div class="sf">
+      <label>New Password</label>
+      <div class="sf-pw">
+        <input type="password" id="newPass" placeholder="at least 6 characters"/>
+        <button type="button" class="sf-pw-btn" onclick="sfTogglePw('newPass',this)" tabindex="-1">SHOW</button>
+      </div>
+    </div>
+    <button class="settings-btn" onclick="doChangePassword()">Update Password</button>
+    <div class="settings-msg" id="pwMsg"></div>
+  </div>
+</div>
+
+<div id="guestNotice" style="display:none;margin:0 60px 60px;padding:20px 24px;border:1px solid #2a0000;border-radius:4px;background:#080000;font-size:12px;letter-spacing:2px;color:#cc3333">
+  Account settings are not available for guest accounts. <a href="/login" style="color:#ff6644;text-decoration:none">Sign up for a full account</a> to change your username and password.
+</div>
+
+<script>
+const fmt    =s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(Math.floor(s%60)).padStart(2,'0');
+const fmtNum =n=>n>=1000?(n/1000).toFixed(1)+'k':n;
+const fmtDate=u=>new Date(u*1000).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'2-digit'});
+
+let _isGuest=false;
+
+async function loadUser(){
+  const {user}=await fetch('/api/auth/me').then(r=>r.json());
+  const el=document.getElementById('navUser');
+  if(user){
+    el.textContent=user.username;
+    document.getElementById('pageSubtitle').textContent=user.username;
+    if(user.isAdmin){
+      const nav=document.querySelector('nav');
+      const adminLink=document.createElement('a');
+      adminLink.href='/admin';adminLink.className='nl';adminLink.textContent='Admin';
+      nav.insertBefore(adminLink,document.querySelector('.nl.out'));
+    }
+    _isGuest=!!user.isGuest;
+    if(_isGuest){
+      document.getElementById('guestNotice').style.display='block';
+    } else {
+      document.getElementById('settingsGrid').style.display='grid';
+    }
+  } else {
+    el.style.display='none';
+  }
+}
+
+function sfTogglePw(id,btn){
+  const input=document.getElementById(id);
+  const show=input.type==='password';
+  input.type=show?'text':'password';
+  btn.textContent=show?'HIDE':'SHOW';
+}
+
+function _showMsg(id,text,type){
+  const el=document.getElementById(id);
+  el.textContent=text;
+  el.className=`settings-msg ${type} show`;
+}
+
+async function doChangeUsername(){
+  const newUsername=document.getElementById('newUsername').value.trim();
+  if(!newUsername)return _showMsg('unMsg','Enter a new username','error');
+  const r=await fetch('/api/auth/change-username',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({newUsername})});
+  const d=await r.json();
+  if(!r.ok)return _showMsg('unMsg',d.error,'error');
+  _showMsg('unMsg','Username updated','success');
+  document.getElementById('navUser').textContent=newUsername;
+  document.getElementById('pageSubtitle').textContent=newUsername;
+  document.getElementById('newUsername').value='';
+}
+
+async function doChangePassword(){
+  const currentPassword=document.getElementById('curPass').value;
+  const newPassword=document.getElementById('newPass').value;
+  if(!currentPassword||!newPassword)return _showMsg('pwMsg','Fill in both fields','error');
+  const r=await fetch('/api/auth/change-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({currentPassword,newPassword})});
+  const d=await r.json();
+  if(!r.ok)return _showMsg('pwMsg',d.error,'error');
+  _showMsg('pwMsg','Password updated','success');
+  document.getElementById('curPass').value='';
+  document.getElementById('newPass').value='';
+}
+
+async function load(){
+  const rows=await fetch('/api/scores/me').then(r=>r.json());
+
+  if(!rows.length){
+    document.getElementById('emptyState').innerHTML=
+      '<div class="empty" style="padding:100px 20px">No runs yet — <a href="/">play a game</a> to see your stats here.</div>';
+    return;
+  }
+
+  const bestTime  =Math.max(...rows.map(r=>r.time));
+  const totalKills=rows.reduce((a,r)=>a+r.kills,0);
+  const totalDmg  =rows.reduce((a,r)=>a+r.damage,0);
+  const wins      =rows.filter(r=>r.won).length;
+  const winPct    =Math.round((wins/rows.length)*100);
+  const bestDps   =Math.max(...rows.map(r=>r.dps));
+  const bestIdx   =rows.findIndex(r=>r.time===bestTime);
+
+  const cardsEl=document.getElementById('cards');
+  cardsEl.style.display='grid';
+  cardsEl.innerHTML=`
+    <div class="sc">
+      <div class="sc-label">Total Runs</div>
+      <div class="sc-val">${rows.length}</div>
+    </div>
+    <div class="sc">
+      <div class="sc-label">Best Time</div>
+      <div class="sc-val" style="font-size:36px">${fmt(bestTime)}</div>
+    </div>
+    <div class="sc">
+      <div class="sc-label">Total Kills</div>
+      <div class="sc-val">${totalKills>=1000?(totalKills/1000).toFixed(1)+'k':totalKills}</div>
+    </div>
+    <div class="sc">
+      <div class="sc-label">Total Damage</div>
+      <div class="sc-val">${(totalDmg/1000).toFixed(1)}<span class="sc-unit">k</span></div>
+    </div>
+    <div class="sc">
+      <div class="sc-label">Win Rate</div>
+      <div class="sc-val amber">${winPct}<span class="sc-unit">%</span></div>
+      <div class="sc-sub">${wins} win${wins!==1?'s':''} from ${rows.length} run${rows.length!==1?'s':''}</div>
+    </div>
+    <div class="sc">
+      <div class="sc-label">Best DPS</div>
+      <div class="sc-val">${bestDps}</div>
+    </div>`;
+
+  document.getElementById('runCount').innerHTML=
+    `<strong>${rows.length}</strong> run${rows.length!==1?'s':''}`;
+  document.getElementById('sectionHead').style.display='flex';
+
+  document.getElementById('tbox').style.display='block';
+  document.getElementById('root').innerHTML=`
+    <table>
+      <thead><tr>
+        <th>Time</th>
+        <th class="r">Kills</th><th class="r">Lvl</th>
+        <th class="r">Damage</th><th class="r">DPS</th>
+        <th>Win</th><th>PB</th><th>Date</th>
+      </tr></thead>
+      <tbody>${rows.map((r,i)=>`
+        <tr${i===bestIdx?' class="best"':''}>
+          <td class="time">${fmt(r.time)}</td>
+          <td class="num">${r.kills}</td>
+          <td class="num">${r.level}</td>
+          <td class="num">${fmtNum(r.damage)}</td>
+          <td class="num">${r.dps}</td>
+          <td class="win">${r.won?'✦':''}</td>
+          <td class="pb">${i===bestIdx?'★ BEST':''}</td>
+          <td class="date">${fmtDate(r.created_at)}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+async function logout(){ await fetch('/api/auth/logout',{method:'POST'}); location.href='/login'; }
+loadUser(); load();
+</script>
+</body>
+</html>

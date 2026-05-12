@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin — BUTTERBALL'S LAST STAND</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background:#0d0000;
+  font-family:'Georgia',serif;
+  min-height:100vh; display:flex; flex-direction:column;
+  color:#fff;
+}
+
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(18px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes glow {
+  0%,100% { filter:drop-shadow(0 0 10px #cc1111) drop-shadow(0 0 28px #880000); }
+  50%      { filter:drop-shadow(0 0 18px #ff2222) drop-shadow(0 0 44px #cc0000); }
+}
+
+/* ── HEADER ── */
+header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 60px; height:70px; background:#000;
+  border-bottom:1px solid #2a0000;
+  position:sticky; top:0; z-index:10; flex-shrink:0; contain:paint;
+}
+.brand {
+  font-size:22px; letter-spacing:8px; color:#cc1111;
+  animation:glow 4s ease-in-out infinite;
+  will-change:filter; transform:translateZ(0); white-space:nowrap;
+}
+nav { display:flex; align-items:center; gap:2px; }
+.nu {
+  font-size:13px; color:#ff4433;
+  padding-right:20px; margin-right:8px;
+  border-right:1px solid #2a0000; white-space:nowrap;
+}
+.nl {
+  font-size:13px; color:#dd3333; text-decoration:none;
+  padding:8px 18px; white-space:nowrap;
+  transition:color .2s, background .2s; border-radius:3px;
+}
+.nl:hover        { color:#fff; background:#1a0000; }
+.nl.active       { color:#fff; }
+.nl.active::after { content:''; display:block; height:2px; background:#cc1111; margin-top:2px; }
+.nl.play         { background:#cc1111; color:#fff; margin-left:8px; }
+.nl.play:hover   { background:#e01212; }
+.nl.out:hover    { color:#ff4433; }
+
+/* ── PAGE HEADER ── */
+.page-head {
+  padding:40px 60px 28px; animation:fadeUp .3s ease both;
+  display:flex; align-items:flex-end; justify-content:space-between;
+}
+.page-title { font-size:32px; letter-spacing:4px; color:#fff; line-height:1; }
+.page-title span { display:block; font-size:13px; letter-spacing:3px; color:#cc3333; margin-top:6px; }
+
+/* ── TABS ── */
+.tabs-bar {
+  display:flex; gap:8px; padding:0 60px 24px;
+  animation:fadeUp .32s .04s ease both;
+}
+.tab-btn {
+  font-family:inherit; font-size:13px; letter-spacing:1px;
+  padding:8px 22px; border:1px solid #3a0000; background:transparent;
+  color:#dd3333; cursor:pointer; border-radius:3px; transition:all .18s;
+}
+.tab-btn:hover  { border-color:#aa1111; color:#ff6644; background:#160000; }
+.tab-btn.active { border-color:#cc1111; background:#cc1111; color:#fff; }
+
+/* ── TABLE CONTAINER ── */
+.tbox {
+  margin:0 60px 40px; border:1px solid #2a0000; border-radius:4px;
+  overflow:hidden; animation:fadeUp .34s .08s ease both;
+}
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
+
+table { width:100%; border-collapse:collapse; }
+thead tr { background:#080000; border-bottom:1px solid #2a0000; }
+th {
+  padding:13px 20px; text-align:left;
+  font-size:11px; letter-spacing:3px; color:#cc3333;
+  font-weight:normal; text-transform:uppercase; white-space:nowrap;
+}
+th.r { text-align:right; }
+tbody tr { border-bottom:1px solid #1a0000; transition:background .14s; }
+tbody tr:last-child { border-bottom:none; }
+tbody tr:hover { background:#110000; }
+td { padding:14px 20px; vertical-align:middle; font-size:13px; }
+td.r { text-align:right; }
+td.muted  { color:#883333; font-size:12px; }
+td.bright { color:#ff6644; }
+td.time   { color:#ff6644; font-variant-numeric:tabular-nums; letter-spacing:1px; }
+td.num    { text-align:right; color:#ee4444; }
+td.date   { color:#aa3333; font-size:11px; letter-spacing:1px; }
+
+/* ── BADGES ── */
+.badge {
+  display:inline-block; font-size:9px; letter-spacing:2px; text-transform:uppercase;
+  padding:2px 8px; border-radius:2px; vertical-align:middle; margin-left:6px;
+}
+.badge-admin { background:#440000; color:#ff4433; border:1px solid #661111; }
+.badge-guest { background:#1a1400; color:#cc8833; border:1px solid #554400; }
+
+/* ── ACTION BUTTONS ── */
+.act {
+  font-family:inherit; font-size:10px; letter-spacing:2px; text-transform:uppercase;
+  padding:5px 12px; cursor:pointer; border-radius:2px; border:1px solid;
+  transition:all .16s; white-space:nowrap;
+}
+.act-danger  { color:#ff4433; border-color:#660000; background:transparent; }
+.act-danger:hover  { background:#1a0000; border-color:#cc1111; color:#ff6644; }
+.act-neutral { color:#cc8833; border-color:#554400; background:transparent; }
+.act-neutral:hover { background:#1a1000; border-color:#cc8833; color:#ffaa33; }
+.act-promote { color:#44cc88; border-color:#115533; background:transparent; }
+.act-promote:hover { background:#001a0e; border-color:#44cc88; }
+.act-demote  { color:#cc4433; border-color:#551100; background:transparent; }
+.act-demote:hover  { background:#1a0000; border-color:#cc4433; }
+.actions { display:flex; gap:6px; }
+
+/* ── SUMMARY BAR ── */
+.summary {
+  display:flex; gap:32px; padding:16px 20px;
+  background:#080000; border-bottom:1px solid #2a0000;
+  font-size:11px; letter-spacing:2px; color:#883333;
+}
+.summary strong { color:#ff6644; font-size:15px; letter-spacing:0; }
+
+/* ── SEARCH ── */
+.search-bar {
+  padding:12px 20px; background:#050000; border-bottom:1px solid #2a0000;
+  display:flex; gap:10px; align-items:center;
+}
+.search-bar input {
+  background:#0a0000; border:1px solid #3a0000; color:#fff;
+  font-family:inherit; font-size:13px; padding:8px 12px; outline:none;
+  width:280px; transition:border-color .2s;
+}
+.search-bar input:focus { border-color:#cc1111; }
+.search-bar input::placeholder { color:#773333; }
+.search-label { font-size:11px; letter-spacing:2px; color:#883333; }
+
+/* ── RESET PASSWORD MODAL ── */
+.modal-backdrop {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,.82); z-index:100;
+  align-items:center; justify-content:center;
+}
+.modal-backdrop.open { display:flex; }
+.modal {
+  background:#060000; border:1px solid #2a0000; border-radius:4px;
+  padding:32px 40px; min-width:340px;
+}
+.modal-title {
+  font-size:16px; letter-spacing:4px; color:#fff; margin-bottom:6px;
+}
+.modal-sub { font-size:12px; letter-spacing:2px; color:#cc3333; margin-bottom:24px; }
+.modal label {
+  display:block; font-size:11px; letter-spacing:3px; color:#fff;
+  opacity:.75; margin-bottom:6px; text-transform:uppercase;
+}
+.modal-pw { position:relative; margin-bottom:20px; }
+.modal-pw input {
+  width:100%; padding:11px 50px 11px 14px;
+  background:#0a0000; border:1px solid #3a0000; color:#fff;
+  font-family:inherit; font-size:14px; outline:none;
+  transition:border-color .2s, box-shadow .2s;
+}
+.modal-pw input:focus { border-color:#cc1111; box-shadow:0 0 0 3px rgba(204,17,17,.1); }
+.modal-pw input::placeholder { color:#773333; }
+.modal-pw-toggle {
+  position:absolute; right:0; top:0; height:100%; width:46px;
+  background:none; border:none; border-left:1px solid #3a0000;
+  color:#aa3333; cursor:pointer; font-family:inherit;
+  font-size:10px; letter-spacing:2px; text-transform:uppercase;
+  transition:color .18s, background .18s;
+}
+.modal-pw-toggle:hover { color:#ff4433; background:rgba(80,0,0,.15); }
+.modal-actions { display:flex; gap:10px; }
+.modal-btn {
+  padding:11px 24px; font-family:inherit; font-size:12px; letter-spacing:3px;
+  text-transform:uppercase; cursor:pointer; border-radius:2px;
+  transition:all .18s;
+}
+.modal-btn-confirm { background:#cc1111; color:#fff; border:none; }
+.modal-btn-confirm:hover { background:#e01212; }
+.modal-btn-cancel  { background:transparent; color:#dd3333; border:1px solid #3a0000; }
+.modal-btn-cancel:hover  { background:#1a0000; border-color:#cc1111; color:#fff; }
+.modal-msg {
+  display:none; font-size:11px; letter-spacing:1px; margin-top:14px;
+  padding:8px 12px;
+}
+.modal-msg.error   { color:#ff4444; background:rgba(180,0,0,.15); border:1px solid #660000; }
+.modal-msg.success { color:#44ee88; background:rgba(0,100,50,.12); border:1px solid #005533; }
+.modal-msg.show    { display:block; }
+
+/* ── EMPTY / LOADING ── */
+.empty { text-align:center; padding:60px 20px; font-size:13px; letter-spacing:4px; color:#883333; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">BUTTERBALL'S LAST STAND</div>
+  <nav>
+    <div class="nu" id="navUser"></div>
+    <a href="/leaderboard" class="nl">Leaderboard</a>
+    <a href="/stats" class="nl">My Stats</a>
+    <a href="/admin" class="nl active">Admin</a>
+    <a href="#" class="nl out" onclick="logout()">Sign Out</a>
+    <a href="/" class="nl play">▶ Play</a>
+  </nav>
+</header>
+
+<div class="page-head">
+  <div class="page-title">
+    Admin Panel
+    <span>Server Management</span>
+  </div>
+</div>
+
+<div class="tabs-bar">
+  <button class="tab-btn active" onclick="switchTab('users')">Users</button>
+  <button class="tab-btn"        onclick="switchTab('scores')">All Scores</button>
+</div>
+
+<!-- USERS TAB -->
+<div class="tbox">
+  <div id="tabUsers" class="tab-panel active">
+    <div class="summary" id="userSummary"></div>
+    <div class="search-bar">
+      <span class="search-label">Filter</span>
+      <input type="text" id="userSearch" placeholder="Search by username…" oninput="filterUsers()"/>
+    </div>
+    <div id="userTableWrap"><div class="empty">LOADING · · ·</div></div>
+  </div>
+
+  <!-- SCORES TAB -->
+  <div id="tabScores" class="tab-panel">
+    <div class="summary" id="scoreSummary"></div>
+    <div class="search-bar">
+      <span class="search-label">Filter</span>
+      <input type="text" id="scoreSearch" placeholder="Search by username…" oninput="filterScores()"/>
+    </div>
+    <div id="scoreTableWrap"><div class="empty">LOADING · · ·</div></div>
+  </div>
+</div>
+
+<!-- RESET PASSWORD MODAL -->
+<div class="modal-backdrop" id="resetModal">
+  <div class="modal">
+    <div class="modal-title">Reset Password</div>
+    <div class="modal-sub" id="resetModalSub"></div>
+    <label>New Password</label>
+    <div class="modal-pw">
+      <input type="password" id="resetPwInput" placeholder="at least 6 characters"/>
+      <button type="button" class="modal-pw-toggle" onclick="toggleModalPw()" tabindex="-1">SHOW</button>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-confirm" onclick="confirmReset()">Set Password</button>
+      <button class="modal-btn modal-btn-cancel"  onclick="closeResetModal()">Cancel</button>
+    </div>
+    <div class="modal-msg" id="resetMsg"></div>
+  </div>
+</div>
+
+<script>
+const fmt    = s => String(Math.floor(s/60)).padStart(2,'0')+':'+String(Math.floor(s%60)).padStart(2,'0');
+const fmtDate= u => new Date(u*1000).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'2-digit'});
+const esc    = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+let allUsers  = [];
+let allScores = [];
+let resetTargetId = null;
+
+/* ── INIT ── */
+async function init() {
+  const { user } = await fetch('/api/auth/me').then(r => r.json());
+  if (user) document.getElementById('navUser').textContent = user.username;
+  await Promise.all([loadUsers(), loadScores()]);
+}
+
+/* ── TABS ── */
+function switchTab(t) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) =>
+    b.classList.toggle('active', ['users','scores'][i] === t));
+  document.getElementById('tabUsers').classList.toggle('active',  t === 'users');
+  document.getElementById('tabScores').classList.toggle('active', t === 'scores');
+}
+
+/* ── USERS ── */
+async function loadUsers() {
+  allUsers = await fetch('/api/admin/users').then(r => r.json());
+  renderUsers(allUsers);
+  const total    = allUsers.length;
+  const guests   = allUsers.filter(u => u.is_guest).length;
+  const admins   = allUsers.filter(u => u.is_admin).length;
+  const totalRuns= allUsers.reduce((a,u) => a + u.run_count, 0);
+  document.getElementById('userSummary').innerHTML =
+    `<span><strong>${total}</strong> users</span>
+     <span><strong>${total - guests}</strong> registered</span>
+     <span><strong>${guests}</strong> guests</span>
+     <span><strong>${admins}</strong> admins</span>
+     <span><strong>${totalRuns}</strong> total runs</span>`;
+}
+
+function filterUsers() {
+  const q = document.getElementById('userSearch').value.toLowerCase();
+  renderUsers(q ? allUsers.filter(u => u.username.toLowerCase().includes(q)) : allUsers);
+}
+
+function renderUsers(rows) {
+  if (!rows.length) {
+    document.getElementById('userTableWrap').innerHTML = '<div class="empty">No users found</div>';
+    return;
+  }
+  document.getElementById('userTableWrap').innerHTML = `
+    <table>
+      <thead><tr>
+        <th>#</th><th>Username</th><th>Type</th>
+        <th class="r">Runs</th><th>Joined</th><th>Actions</th>
+      </tr></thead>
+      <tbody>${rows.map(u => {
+        const badge = u.is_admin
+          ? '<span class="badge badge-admin">Admin</span>'
+          : u.is_guest ? '<span class="badge badge-guest">Guest</span>' : '';
+        const promoteBtn = u.is_admin
+          ? `<button class="act act-demote"  onclick="promoteUser(${u.id},this)">Demote</button>`
+          : `<button class="act act-promote" onclick="promoteUser(${u.id},this)">Make Admin</button>`;
+        const resetBtn = u.is_guest ? '' :
+          `<button class="act act-neutral" onclick="openResetModal(${u.id},'${esc(u.username)}')">Reset PW</button>`;
+        return `<tr id="urow-${u.id}">
+          <td class="muted">${u.id}</td>
+          <td class="bright">${esc(u.username)}${badge}</td>
+          <td class="muted">${u.is_admin ? 'Admin' : u.is_guest ? 'Guest' : 'Registered'}</td>
+          <td class="num">${u.run_count}</td>
+          <td class="date">${fmtDate(u.created_at)}</td>
+          <td><div class="actions">${resetBtn}${promoteBtn}
+            <button class="act act-danger" onclick="deleteUser(${u.id})">Delete</button>
+          </div></td>
+        </tr>`;
+      }).join('')}
+      </tbody>
+    </table>`;
+}
+
+async function deleteUser(id) {
+  const u = allUsers.find(u => u.id === id);
+  if (!confirm(`Delete "${u.username}" and all their scores? This cannot be undone.`)) return;
+  const r = await fetch(`/api/admin/users/${id}`, { method:'DELETE' });
+  const d = await r.json();
+  if (!r.ok) return alert(d.error);
+  allUsers = allUsers.filter(u => u.id !== id);
+  allScores = allScores.filter(s => s.username !== u.username); // approximate cleanup
+  filterUsers();
+  filterScores();
+}
+
+async function promoteUser(id, btn) {
+  const r = await fetch(`/api/admin/users/${id}/promote`, { method:'POST' });
+  const d = await r.json();
+  if (!r.ok) return alert(d.error);
+  const u = allUsers.find(u => u.id === id);
+  u.is_admin = d.is_admin;
+  filterUsers();
+}
+
+/* ── RESET PASSWORD MODAL ── */
+function openResetModal(id, username) {
+  resetTargetId = id;
+  document.getElementById('resetModalSub').textContent = `for ${username}`;
+  document.getElementById('resetPwInput').value = '';
+  document.getElementById('resetPwInput').type = 'password';
+  document.querySelector('.modal-pw-toggle').textContent = 'SHOW';
+  document.getElementById('resetMsg').className = 'modal-msg';
+  document.getElementById('resetModal').classList.add('open');
+  setTimeout(() => document.getElementById('resetPwInput').focus(), 60);
+}
+
+function closeResetModal() {
+  document.getElementById('resetModal').classList.remove('open');
+  resetTargetId = null;
+}
+
+function toggleModalPw() {
+  const inp = document.getElementById('resetPwInput');
+  const btn = document.querySelector('.modal-pw-toggle');
+  const show = inp.type === 'password';
+  inp.type = show ? 'text' : 'password';
+  btn.textContent = show ? 'HIDE' : 'SHOW';
+}
+
+async function confirmReset() {
+  const newPassword = document.getElementById('resetPwInput').value;
+  const r = await fetch(`/api/admin/users/${resetTargetId}/reset-password`, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ newPassword })
+  });
+  const d = await r.json();
+  const msgEl = document.getElementById('resetMsg');
+  if (!r.ok) {
+    msgEl.textContent = d.error;
+    msgEl.className = 'modal-msg error show';
+    return;
+  }
+  msgEl.textContent = 'Password updated successfully.';
+  msgEl.className = 'modal-msg success show';
+  setTimeout(closeResetModal, 1200);
+}
+
+document.getElementById('resetModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('resetModal')) closeResetModal();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeResetModal();
+  if (e.key === 'Enter' && document.getElementById('resetModal').classList.contains('open')) confirmReset();
+});
+
+/* ── SCORES ── */
+async function loadScores() {
+  allScores = await fetch('/api/admin/scores').then(r => r.json());
+  renderScores(allScores);
+  const wins = allScores.filter(s => s.won).length;
+  document.getElementById('scoreSummary').innerHTML =
+    `<span><strong>${allScores.length}</strong> scores</span>
+     <span><strong>${wins}</strong> wins</span>
+     <span><strong>${allScores.length - wins}</strong> losses</span>`;
+}
+
+function filterScores() {
+  const q = document.getElementById('scoreSearch').value.toLowerCase();
+  renderScores(q ? allScores.filter(s => s.username.toLowerCase().includes(q)) : allScores);
+}
+
+function renderScores(rows) {
+  if (!rows.length) {
+    document.getElementById('scoreTableWrap').innerHTML = '<div class="empty">No scores found</div>';
+    return;
+  }
+  document.getElementById('scoreTableWrap').innerHTML = `
+    <table>
+      <thead><tr>
+        <th>#</th><th>Username</th><th>Time</th>
+        <th class="r">Kills</th><th class="r">Lvl</th>
+        <th class="r">Damage</th><th class="r">DPS</th>
+        <th>Win</th><th>Date</th><th>Action</th>
+      </tr></thead>
+      <tbody>${rows.map((s,i) => {
+        const badge = s.is_admin
+          ? '<span class="badge badge-admin">Admin</span>'
+          : s.is_guest ? '<span class="badge badge-guest">Guest</span>' : '';
+        return `<tr id="srow-${s.id}">
+          <td class="muted">${i+1}</td>
+          <td class="bright">${esc(s.username)}${badge}</td>
+          <td class="time">${fmt(s.time)}</td>
+          <td class="num">${s.kills}</td>
+          <td class="num">${s.level}</td>
+          <td class="num">${s.damage >= 1000 ? (s.damage/1000).toFixed(1)+'k' : s.damage}</td>
+          <td class="num">${s.dps}</td>
+          <td style="text-align:center;color:#cc8833">${s.won ? '✦' : ''}</td>
+          <td class="date">${fmtDate(s.created_at)}</td>
+          <td><button class="act act-danger" onclick="deleteScore(${s.id})">Delete</button></td>
+        </tr>`;
+      }).join('')}
+      </tbody>
+    </table>`;
+}
+
+async function deleteScore(id) {
+  if (!confirm('Delete this score? This cannot be undone.')) return;
+  const r = await fetch(`/api/admin/scores/${id}`, { method:'DELETE' });
+  const d = await r.json();
+  if (!r.ok) return alert(d.error);
+  allScores = allScores.filter(s => s.id !== id);
+  filterScores();
+}
+
+async function logout() { await fetch('/api/auth/logout', { method:'POST' }); location.href = '/login'; }
+
+init();
+</script>
+</body>
+</html>
