@@ -2,7 +2,7 @@
 
 A browser-based roguelike survivor built from scratch with vanilla JavaScript, Node.js, and PostgreSQL. Survive 10 minutes of escalating enemy waves, level up between rounds, and compete on a global leaderboard.
 
-**[GitHub](https://github.com/stringf47/RoguelikeSurvival)**
+**[Play Now](https://roguelikesurvival-production.up.railway.app/login)** &nbsp;|&nbsp; **[GitHub](https://github.com/stringf47/RoguelikeSurvival)**
 
 ---
 
