@@ -25,7 +25,7 @@ A browser-based roguelike survivor built from scratch with vanilla JavaScript, N
 - **Admin panel** — user management (promote, reset password, delete), score moderation
 
 ### Technical Stuff
-- Pure vanilla JS frontend — no frameworks, no build step
+- Pure vanilla JS frontend
 - ~3 000 lines of client-side game logic split across focused modules (`combat.js`, `render.js`, `spawn.js`, `audio.js`, `xp.js`)
 - Tone.js generative soundtrack: sequenced arpeggios, bass, drums, and contextual drones (chest proximity, XP vacuum, combat intensity)
 - PostgreSQL with indexed queries for fast leaderboard lookups
