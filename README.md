@@ -1,6 +1,6 @@
 # Butterball's Last Stand
 
-A browser-based roguelike survivor built from scratch with vanilla JavaScript, Node.js, and PostgreSQL. Survive 10 minutes of escalating enemy waves, level up between rounds, and compete on a global leaderboard.
+A browser-based roguelike survivor built from scratch with vanilla JS, Node.js, and PostgreSQL. Survive 10 minutes of enemy waves, pick up upgrades between rounds, and compete on a leaderboard.
 
 **[Play Now](https://roguelikesurvival-production.up.railway.app/login)**
 
@@ -9,27 +9,27 @@ A browser-based roguelike survivor built from scratch with vanilla JavaScript, N
 ## Features
 
 ### Gameplay
-- Canvas-based game loop with fixed timestep, camera shake, and particle effects
+- Canvas game loop with camera shake and particle effects
 - 10+ weapon types (projectile, AoE, orbital, chain) each with 10-level upgrade trees
-- 8 enemy types across 5 wave tiers, each with distinct AI behaviours — charging rams, teleporting scarecrows, poison-trail snails, zigzagging foxes
+- 8 enemy types across 5 wave tiers with distinct behaviours: charging rams, teleporting scarecrows, poison-trail snails, zigzagging foxes
 - Boss encounters (Strengthening Seal, Crimson Cross) that apply run-wide debuffs
-- 60+ passive upgrades selectable between waves with synergistic interactions
-- Continuous difficulty scaling: enemy HP/speed ramps with game time, damage multiplier steps every 2.5 minutes after the 5-minute mark
-- Mutually exclusive enemy class system — each run randomly picks one mob from each class pair, keeping runs varied
+- 60+ passive upgrades to choose between waves, many with synergies
+- Difficulty scales continuously: enemy stats ramp with time, damage multiplier increases every 2.5 minutes past the 5-minute mark
+- Each run randomly picks one mob from each class pair, so no two runs play exactly the same
 
 ### Backend
-- **Auth** — registration, login, guest play, password and username changes; passwords hashed with bcrypt
-- **Sessions** — server-side session persistence via `express-session`
-- **Score tracking** — records time survived, kills, level, total damage, XP, and DPS per run
-- **Leaderboard** — ranked by wins → time → kills, with personal stats page
-- **Admin panel** — user management (promote, reset password, delete), score moderation
+- **Auth:** registration, login, guest play, password/username changes; bcrypt hashed
+- **Sessions:** server-side persistence via `express-session`
+- **Score tracking:** time survived, kills, level, damage, XP, and DPS per run
+- **Leaderboard:** ranked by wins, then time, then kills; personal stats page included
+- **Admin panel:** user management (promote, reset password, delete), score moderation
 
-### Technical Stuff
-- Pure vanilla JS frontend
-- ~3 000 lines of client-side game logic split across focused modules (`combat.js`, `render.js`, `spawn.js`, `audio.js`, `xp.js`)
-- Tone.js generative soundtrack: sequenced arpeggios, bass, drums, and contextual drones (chest proximity, XP vacuum, combat intensity)
-- PostgreSQL with indexed queries for fast leaderboard lookups
-- RESTful Express API with input validation and role-based access control for admin routes
+### Technical
+- No frameworks, no build step, just vanilla JS
+- ~3000 lines of client-side game logic across focused modules (`combat.js`, `render.js`, `spawn.js`, `audio.js`, `xp.js`)
+- Generative soundtrack via Tone.js: arpeggios, bass, drums, and contextual drones that react to gameplay
+- PostgreSQL with indexed queries for leaderboard lookups
+- Express REST API with input validation and role-based access on admin routes
 
 ---
 
@@ -49,14 +49,9 @@ A browser-based roguelike survivor built from scratch with vanilla JavaScript, N
 ## Getting Started
 
 ```bash
-# Install dependencies
 npm install
-
-# Set up environment variables
 cp .env.example .env
-# Edit .env with your PostgreSQL credentials
-
-# Start the server
+# fill in your PostgreSQL credentials
 npm start
 ```
 
@@ -67,18 +62,18 @@ Visit `http://localhost:4000`
 ## Project Structure
 
 ```
-├── server.js          # Express app entry point
+├── server.js          # Express entry point
 ├── db.js              # PostgreSQL connection and schema
 ├── routes/
 │   ├── auth.js        # Register, login, session management
 │   ├── scores.js      # Score submission and leaderboard
-│   └── admin.js       # Admin user and score moderation
+│   └── admin.js       # Admin moderation
 ├── views/             # HTML pages (game, leaderboard, stats, admin)
 └── public/js/
     ├── main.js        # Game loop, state machine, wave logic
     ├── config.js      # Weapon and enemy definitions
     ├── combat.js      # Damage, projectiles, kill handling
-    ├── render.js      # Canvas draw calls, particles, UI
+    ├── render.js      # Canvas rendering, particles, UI
     ├── spawn.js       # Enemy spawning and wave weighting
     ├── xp.js          # Level-up and passive upgrade system
     └── audio.js       # Tone.js music and SFX
